@@ -2,7 +2,7 @@
 
 kubernetes目录来自于 [Kubeadm HA](https://github.com/TimeBye/kubeadm-ha)
 
-old 、common 、mysql 是经过验证的使用过的！
+old 、common 、mysql 是工作中自己编写的，经过验证的！
 
 old目录是大概2017年用过的
 
