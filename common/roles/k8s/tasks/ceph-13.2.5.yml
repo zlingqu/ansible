@@ -1,0 +1,11 @@
+- name: 添加ceph-mimic的yum 仓库
+  yum_repository:
+    name: ceph-mimic #文件名/etc/yum.repos.d/{{name}}.repo ,也是文件中[]的名字
+    description: Ceph mimic packages
+    baseurl: https://mirrors.aliyun.com/ceph/rpm-mimic/el7/x86_64/
+    enabled: yes
+    gpgcheck: no
+    state: present
+- name: 安装ceph-common-13.2.5
+  yum:
+    name: ceph-common-13.2.5

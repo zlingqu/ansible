@@ -1,0 +1,14 @@
+scala_version: 2.11
+kafka_version: 0.11.0.3
+kafka_port: 9092
+unarchive_dir: "/usr/local/kafka_{{ kafka_port }}"
+app_dir: "{{ unarchive_dir }}/kafka_{{ scala_version }}-{{ kafka_version }}"
+log_dir: "/data/kafka-logs-{{ kafka_port }}"
+log_retention_hours: 24 #保留时长
+log_segment_bytes: 1073741824 #单分区要保留的消息体最大大小，默认1073741824=1024*1024*1024=1GB
+message_max_bytes: 31457280 #server端允许的最大记录批大小，这里表示是30MB
+replica_fetch_max_bytes: 32505856 #每个分区试图获取的消息字节数,这里表示是31MB，应该大于message.max.bytes
+max_request_size: 30408704 #请求的最大大小为字节,这里表示29MB，要小于 message.max.bytes
+fetch_message_max_bytes: 32505856 #每个提取请求中为每个主题分区提取的消息字节数,要大于等于message.max.bytes,这里是31M 
+
+log_retention_bytes: 10737418240 #日志清理的大小策略，这是表示10GB

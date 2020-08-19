@@ -1,0 +1,11 @@
+db.createUser({
+ user:"{{ root_user_name }}",
+ pwd:"{{ root_user_passwd }}",
+ roles: [ { role: "root",db:"admin"}]
+})
+
+db.createUser({
+ user:"{{ read_user_name }}",
+ pwd:"{{ read_user_passwd }}",
+ roles: [ { role: "readAnyDatabase",db:"admin"}]
+})

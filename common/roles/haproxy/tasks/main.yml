@@ -1,0 +1,26 @@
+- name: 安装 haproxy 
+  yum:
+    name: "{{ item }}"
+  with_items:
+    - haproxy
+
+- debug: 
+    msg: "{{ item }}"
+  with_items: "{{ tcp_listen }}"
+
+- name: 更新配置文件
+  template:
+    src: haproxy.cfg.j2
+    dest: /etc/haproxy/haproxy.cfg
+    mode: 0644
+    # validate: haproxy -f %s -c -q
+  #with_items: "{{ tcp_listen }}"
+  #when: tcp_listen is defined
+
+- name: 相关服务管理
+  service:
+    name: "{{ item.name }}"
+    state: "{{ item.state }}"
+    enabled: "{{ item.enabled }}"
+  with_items:
+    - { name: 'haproxy', state: 'started', enabled: 'true' }

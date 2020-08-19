@@ -1,0 +1,12 @@
+- hosts: "{{ group }}"
+  gather_facts: no
+  roles:
+  - role: jdk
+  - role: "{{ role }}"
+  vars:
+    auto_create_topics_enable: false #是否允许自动创建topic
+
+
+
+#  ansible-playbook kafka.yml -e group=prd-kafka -e role=kafka/kafka_cluster
+#  ansible-playbook kafka.yml -e group=prd-kafka -e role=kafka/kafka_alone

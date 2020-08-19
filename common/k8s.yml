@@ -1,0 +1,12 @@
+---
+- hosts: "{{ group }}"
+  gather_facts: no
+  become: yes
+  roles:
+  - role: k8s
+###使用方法 ansible-playbook k8s.yml -e group=k8s-test
+###使用方法 ansible-playbook k8s.yml -e group=k8s-dev
+###使用方法 ansible-playbook k8s.yml -e group=k8s-uat
+###使用方法 ansible-playbook k8s.yml -e group=k8s-stage
+###使用方法 ansible-playbook k8s.yml -e group=k8s-dmos
+###使用方法 ansible-playbook k8s.yml -e group=k8s-prd

@@ -1,0 +1,8 @@
+- hosts: k8s-master-node
+  gather_facts: no
+  roles:
+  - { role: k8s-all }
+# ansible-playbook k8s-all.yml -e update_type=prom
+# ansible-playbook k8s-all.yml -e update_type=regsecret
+# ansible-playbook k8s-all.yml -e update_type=log-pilot
+

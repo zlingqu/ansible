@@ -1,0 +1,37 @@
+- hosts: ipvs
+  gather_facts: no
+  roles:
+  - role: ipvs
+  vars:
+    action: start  #可选的有start、stop，start表示安装、配置、启动ipvs，stop表示停止、删除ipvs
+    vrrp_instances: #支持多个vrrp_instances段落
+    - name: VI_1
+      interface: eth0
+      vip: 192.168.3.196
+      auth_pass: 9be778c3e5471a
+    - name: VI_2
+      interface: eth0
+      vip: 192.168.3.195
+      auth_pass: 9be778c3e54d1d
+    virtual_servers: #支持多个virtual_server段落
+    - vip: "192.168.3.196"
+      lb_algo: lc #加权最小连接
+      persistence_timeout: 900
+      port: 80
+      rip: #可配置不通的realserver
+      - ip: 192.168.3.78
+        weight: 1
+      - ip: 192.168.3.79
+        weight: 5
+    - vip: "192.168.3.196"
+      lb_algo: wlc #加权最小连接
+      persistence_timeout: 900
+      port: 443
+      rip:
+      - ip: 192.168.3.78
+        weight: 3
+      - ip: 192.168.3.79
+        weight: 1
+    real_servers:
+    - vip: 192.168.3.196
+      interface: eth0

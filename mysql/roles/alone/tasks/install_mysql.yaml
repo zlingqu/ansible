@@ -1,0 +1,87 @@
+---
+#由本地传输mysql安装包到目标主机、并把安装包解压到/usr/local/目录
+#等价bash
+#scp mysql-xxxx.tar.gz 192.168.xx.xx:/tmp/
+#tar -xvf /tmp/mysq-xxxx.tar.gz -C /usr/local/
+ - name: transfer mysql install package to remote host and unarchive to /usr/local/
+   unarchive:
+    src: "{{ mysql_package }}"
+    dest: /usr/local/
+    owner: mysql
+    group: mysql
+
+#设置权限
+#等价bash
+#chown -R mysql:mysql /usr/local/mysql-xxxx
+ - name: change owner to mysql user
+   when: mysql_package.find('tar.gz') != -1
+   file:
+    path: /usr/local/{{ mysql_package | regex_replace('.tar.gz','') }}
+    owner: mysql
+    group: mysql
+    recurse: yes
+
+#chown -R mysql:mysql /usr/local/mysql-xxxx
+ - name: change owner to mysql user
+   when: mysql_package.find('tar.xz') != -1
+   file:
+    path: /usr/local/{{ mysql_package | regex_replace('.tar.xz','') }}
+    owner: mysql
+    group: mysql
+    recurse: yes
+
+#创建连接文件
+#等价bash
+#ln -s /usr/local/mysql-xxxx /usr/local/mysql
+ - name: make link /usr/local/mysql-xx.yy.zz to /usr/local/mysql
+   when: mysql_package.find('tar.gz') != -1
+   file:
+    src: /usr/local/{{ mysql_package | regex_replace('.tar.gz','') }}
+    dest: /usr/local/mysql
+    state: link
+    owner: mysql
+    group: mysql
+
+ - name: make link /usr/local/mysql-xx.yy.zz to /usr/local/mysql
+   when: mysql_package.find('tar.xz') != -1
+   file:
+    src: /usr/local/{{ mysql_package | regex_replace('.tar.xz','') }}
+    dest: /usr/local/mysql
+    state: link
+    owner: mysql
+    group: mysql
+
+#导出mysql的库文件
+ - name: export mysql share object (*.os)
+   template:
+    src: mysql.conf.j2
+    dest: /etc/ld.so.conf.d/mysql.conf
+
+#加载共享库
+ - name: load share object
+   shell: ldconfig
+
+#导出PATH环境变量
+ - name: export path env variable
+   lineinfile:
+    path: /etc/profile
+    line: export PATH=/usr/local/mysql/bin/:$PATH
+    insertafter: EOF
+
+ - name: export path env to /root/.bashrc
+   lineinfile:
+    path: /root/.bashrc
+    line: export PATH=/usr/local/mysql/bin/:$PATH
+    insertafter: EOF  
+
+ - name: remove /usr/include/mysql
+   file:
+    dest: /usr/include/mysql
+    state: absent
+
+#导出头文件
+ - name: export include file to /usr/include/mysql
+   file:
+    src: /usr/local/mysql/include
+    dest: /usr/include/mysql
+    state: link

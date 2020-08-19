@@ -1,0 +1,18 @@
+- name: server端生成 ssh 公钥
+  user:
+    name: "{{ ssh_user }}"
+    generate_ssh_key: yes
+  when: "'cdh-server' in group_names"
+
+- name: 从server端获取公钥
+  slurp:
+    src: "{{ ssh_user_path }}/.ssh/id_rsa.pub"
+  delegate_to: "{{ groups['cdh-server'][0] }}"
+  run_once: true
+  register: cdh_server_ssh_key
+
+- name: 分发密钥到各节点 
+  authorized_key:
+    user: root
+    state: present
+    key: '{{ cdh_server_ssh_key.content | b64decode }}'

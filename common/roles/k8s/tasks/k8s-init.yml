@@ -1,0 +1,136 @@
+---
+#- hosts: local
+#- hosts: k8s-dev
+- hosts: k8s-test
+  gather_facts: false
+  remote_user: root
+  vars:
+    - pkgs:
+      #- docker-ce-19.03.1-3.el7
+      #- kubernetes-cni-0.7.5-0
+      #- kubelet-1.14.5-0
+      #- kubectl-1.14.5-0
+      #- kubeadm-1.14.5-0
+      #- ceph-common-13.2.5
+      - docker-ce-18.06.3.ce
+      #- kubernetes-cni-0.7.5-0
+      #- kubelet-1.13.5-0
+      #- kubectl-1.13.5-0
+      #- kubeadm-1.13.5-0
+      - kubernetes-cni-0.6.0-0
+      - kubelet-1.12.2-0
+      - kubectl-1.12.2-0
+      - kubeadm-1.12.2-0
+  tasks:
+   - name: 1 创建必要的目录
+     file:
+       path: "{{ item.path }}"
+       state: "{{ item.type }}"
+     with_items:
+        - { type: 'directory', path: '/etc/docker'}
+   - name: 2 传递文件
+     copy: src={{ item.src }} dest={{ item.dest }}
+     with_items:
+       - { src: 'files/k8s.repo', dest: '/etc/yum.repos.d/' }
+       - { src: 'files/docker-ce.repo', dest: '/etc/yum.repos.d/' }
+       - { src: 'files/k8s.conf', dest: '/usr/lib/sysctl.d/00-system.conf' }
+       - { src: 'files/daemon.json', dest: '/etc/docker/daemon.json' }
+       - { src: 'files/ceph-mimic.repo', dest: '/etc/yum.repos.d/' }
+     tags:
+       - file
+   - name: 3 修改hosts
+     lineinfile :
+       path: /etc/hosts
+       line: "{{ item }}"
+     with_items:
+        - 192.168.3.140 master
+        - 192.168.3.141 node1
+        - 192.168.3.142 node2
+        - 192.168.3.143 node3
+        - 192.168.3.144 node4
+        - 192.168.3.145 node5
+        - 192.168.3.146 node6
+        - 192.168.69.61 node7
+        - 192.168.69.62 node8
+        - 192.168.69.63 node9
+        - 192.168.68.70 gpu6870
+#        - 192.168.3.21 master
+#        - 192.168.3.22 node22
+#        - 192.168.3.23 node23
+#        - 192.168.3.24 node24
+#        - 192.168.3.25 node25
+#        - 192.168.3.26 node26
+#        - 192.168.3.27 node27
+#        - 192.168.3.28 node28
+#       - 192.168.11.16 stream-media-0
+#       - 192.168.11.17 node1117
+#       - 192.168.11.18 node1118
+#       - 192.168.11.19 ndoe1119
+#       - 192.168.11.20 master1120
+#       - 192.168.11.21 node1121
+#       - 192.168.11.22 node1122
+#       - 192.168.11.23 node1123
+#       - 192.168.11.24 node1124
+#       - 192.168.11.25 node1125
+#       - 192.168.11.26 node1126
+#       - 192.168.12.16 stream-media-1
+#       - 192.168.12.20 master1220
+#       - 192.168.12.21 node1221
+#       - 192.168.12.22 node1222
+#       - 192.168.12.23 node1223
+#       - 192.168.12.24 node1224
+#       - 192.168.12.25 node1225
+#       - 192.168.12.26 node1226
+#       - 192.168.13.16 stream-media-2
+#       - 192.168.13.20 master1320
+#       - 192.168.13.21 node1321
+#       - 192.168.13.22 node1322
+#       - 192.168.13.23 node1323
+#       - 192.168.13.24 node1324
+#       - 192.168.13.25 node1325
+#       - 192.168.13.26 node1326
+#       - 192.168.68.67 gpu6867
+     tags:
+       - hosts
+   - name: 4 安装一些必要的包 for yum
+     yum:
+       name: "{{ pkgs }}"
+       state: present
+     tags:
+       - yum
+   - name: 5 相关服务管理
+     service:
+       name: "{{ item.name }}"
+       state: "{{ item.state }}"
+       enabled: "{{ item.enabled }}"
+     with_items:
+       - { name: 'docker', state: 'started', enabled: 'true' }
+       - { name: 'kubelet', state: 'started', enabled: 'true'}
+       - { name: 'postfix', state: 'stopped', enabled: 'false' }
+       - { name: 'firewalld', state: 'stopped', enabled: 'false' }
+   - name: 6 禁止selinux
+     selinux:
+       state: disabled
+   - name: 7.1 禁止swap,取消开机自启
+     shell: sed -i 's/^UUID.*\bswap\b/#&/' /etc/fstab
+     tags:
+       - swapoff
+   - name: 7.2 禁止swap,关闭swap
+     shell: swapoff -a
+     tags:
+       - swapoff
+   - name: 8 修改hostname
+     hostname:
+       name: "{{ host }}"
+     tags:
+       - hostname
+   - name: 9 设置定时任务，清理docker image
+     cron:
+       weekday: 0
+       hour: 5
+       minute: 0
+       job: "docker image prune -a -f"
+       name: delete docker images
+     tags:
+       - cron
+...

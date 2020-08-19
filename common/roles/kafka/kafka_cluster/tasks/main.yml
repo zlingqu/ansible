@@ -1,0 +1,35 @@
+- name: 保证相关目录有效
+  file:
+    path: "{{ item }}"
+    state: directory
+  with_items:
+    - "{{ log_dir }}"
+    - "{{ unarchive_dir }}"
+
+- name: 解压kafka
+  unarchive:
+    src: "kafka_{{ scala_version }}-{{ kafka_version }}.tgz"
+    dest: "{{ unarchive_dir }}"
+    creates: "{{ app_dir }}"
+
+- name: 修改配置文件
+  include: config.yml
+  tags:
+    - config
+
+- name: 启动 kafka
+  shell: source /etc/profile && ./bin/kafka-server-start.sh -daemon config/server.properties
+  args:
+    chdir: "{{ app_dir }}"
+
+- name: kafka 开机自启
+  include: autostart.yml
+
+- name: 设置定时任务，kafka日志
+  cron:
+    hour: 5
+    minute: 0
+    job: "find {{ app_dir }}/logs -mtime +30|xargs rm -f"
+    name: delete kafka logs
+  tags:
+    - cron

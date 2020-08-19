@@ -1,0 +1,5 @@
+- hosts: 
+  - cdh-server
+  gather_facts: no
+  roles: 
+  - cdh

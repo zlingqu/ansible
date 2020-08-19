@@ -1,0 +1,10 @@
+- name: 卸载相关软件
+  apt: 
+    name:
+    - kubeadm
+    - kubectl
+    - kubelet
+    - docker-ce
+    - docker-ce-cli
+    - containerd.io
+    state: absent

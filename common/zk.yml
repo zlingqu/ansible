@@ -1,0 +1,6 @@
+- hosts: "{{ group }}"
+  gather_facts: yes
+  roles:
+  - jdk
+  - zookeeper
+#ansible-playbook zk.yml -e group=

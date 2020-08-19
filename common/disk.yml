@@ -1,0 +1,10 @@
+- hosts: "{{ group }}"
+  gather_facts: no
+  roles:
+  - { role: disk }
+  vars:
+    dev_name: vdb
+    mount_dest: /data
+    dev_fstype: xfs
+# ansible-playbook disk.yml -e group=disk
+# ansible-playbook disk.yml -e group=

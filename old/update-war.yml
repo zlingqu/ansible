@@ -1,0 +1,37 @@
+---
+#一个通用的war部署程序,
+- hosts: "{{host_name}}"
+  gather_facts: false  #不采集系统信息，有利于加速访问
+  remote_user: root
+  serial: 1  #串行执行
+  vars:
+    - bak_dir: /rebuild/backup
+    - user_name: lx2
+  tasks:
+   - name: 1 目的主机备份文件{{dest_dir}}/{{pname}}.war到目录{{bak_dir}}
+     become: yes
+     become_user: '{{user_name}}'
+     shell: cp -r {{dest_dir}}/webapps/{{pname}} {{bak_dir}}/{{pname}}.`date "+%Y-%m-%d-%H-%M"`
+     ignore_errors: yes
+   - name: 2 停止 {{dest_dir}}/webapps/{{pname}}
+     shell: service {{pname}} stop
+     ignore_errors: yes
+   - name: 3 同步本地文件{{src_dir}}/{{pname}}到目的主机的{{dest_dir}}/webapps/{{pname}}
+     synchronize: 
+       src={{src_dir}}/{{pname}}/
+       dest={{dest_dir}}/webapps/{{pname}}
+       owner=no
+       group=no
+       delete=yes 
+       recursive=yes
+       rsync_opts="--exclude=.svn"
+
+   - name: 4 重新启动 {{dest_dir}}/webapps/{{pname}}.war
+     shell: service {{pname}} restart
+   - name: 5 检查服务是否运行
+     shell: service {{pname}} status
+     register: status
+   - name: 6 显示检查的结果
+     debug: msg="{{status.stdout}}"
+
+...

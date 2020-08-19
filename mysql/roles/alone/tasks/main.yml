@@ -1,0 +1,82 @@
+- name: create mysql user
+  user:
+    name: mysql
+    state: present
+    uid: "{{mysql_user_uid}}"
+
+- name: config /etc/my.cnf for mysql-5.7.x
+  when: " '5.7' in mysql_package "
+  template:
+    src: my.cnf.5.7.j2
+    dest: /etc/my.cnf
+    owner: mysql
+    group: mysql
+    backup: yes
+  tags:
+  - my.cnf
+
+- name: config /etc/my.cnf for mysql-8.x.x
+  when: mysql_package.find('mysql-8') != -1
+  template:
+    src: my.cnf.8.j2
+    dest: /etc/my.cnf
+    owner: mysql
+    group: mysql
+    backup: yes    
+
+- name: 安装依赖
+  yum:
+    name: "{{ item }}"
+    state: present
+  with_items:
+  - libaio-devel
+  - numactl-devel
+  - perl-Data-Dumper
+
+- name: install mysql to /usr/local/mysql
+  import_tasks: install_mysql.yaml
+
+- name: create datadir
+  file:
+    path: "{{mysql_data_dir_base}}/{{mysql_port}}"
+    state: directory
+    owner: mysql
+    group: mysql
+
+- name: initialize-insecure for mysql-5.7.x
+  when: " 'mysql-5.7' in mysql_package "
+  shell: /usr/local/mysql/bin/mysqld --defaults-file=/etc/my.cnf --datadir={{mysql_data_dir_base}}{{mysql_port}} --initialize-insecure
+  ignore_errors: yes
+
+- name: initialize-insecure for mysql-8.0.x
+  when: " 'mysql-8.0' in mysql_package "
+  shell: /usr/local/mysql/bin/mysqld --defaults-file=/etc/my.cnf --datadir={{mysql_data_dir_base}}{{mysql_port}} --initialize-insecure
+  ignore_errors: yes
+
+
+- name: create systemd config file
+  when: ansible_distribution_major_version == "7"
+  template:
+     src: mysql.service.j2
+     dest: /usr/lib/systemd/system/mysql.service
+
+- name: start mysql(sytemctl)
+  when: ansible_distribution_major_version == "7"
+  systemd:
+    name: mysql
+    state: started
+    daemon_reload: yes
+
+- name: config mysql.service start up on boot
+  when: ansible_distribution_major_version == "7"
+  systemd:
+    name: mysql
+    enabled: yes
+    daemon_reload: yes
+
+
+- name: sleep 15's
+  shell: sleep 15
+
+- name: make mysql secure
+  import_tasks: make_mysql_security.yaml

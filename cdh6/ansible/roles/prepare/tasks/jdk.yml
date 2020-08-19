@@ -1,0 +1,7 @@
+- name: 安装 JDK
+  yum:
+    name: "{{ jdk_rpm }}"
+    enablerepo: Cloudera-Manager
+
+- name: 配置 JAVA_HOME
+  template: src=cdh_java_home.sh dest=/etc/profile.d

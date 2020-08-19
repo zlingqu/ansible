@@ -1,0 +1,19 @@
+- name: 安装 keepalived、ipvsadm
+  yum:
+    name: "{{ item }}"
+  with_items:
+    - keepalived
+    - ipvsadm
+
+- name: keepalvied 开机自启
+  service:
+    name: keepalived
+    state: started
+    enabled: true
+
+- name: 更新配置文件
+  template:
+    src: keepalived.conf.j2
+    dest: /etc/keepalived/keepalived.conf
+  notify:
+    - restart keepalived

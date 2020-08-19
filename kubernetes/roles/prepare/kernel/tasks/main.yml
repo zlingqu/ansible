@@ -1,0 +1,12 @@
+- include_tasks: centos.yml
+  when: ansible_distribution in [ 'CentOS','OracleLinux','RedHat' ]
+
+- include_tasks: ubuntu.yml
+  when: ansible_distribution in [ 'Ubuntu','Debian' ]
+
+- name: 需手动重启服务器
+  debug:
+    msg: >
+      节点：{{ inventory_hostname }}，
+      内核已升级完成，
+      请手动执行 reboot -f 重启该服务器。

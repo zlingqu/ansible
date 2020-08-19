@@ -1,0 +1,35 @@
+- name: 创建安装目录
+  become: yes
+  file:
+    path: /data/logstash/
+    state: directory
+    mode: 0755
+
+- name: create log path
+  become: yes
+  file:
+    path: /data/logs/supervisor/
+    state: directory
+    mode: 0755
+
+- name: create log path
+  become: yes
+  file:
+    path: /etc/supervisor/conf.d/
+    state: directory
+    mode: 0755
+
+#- name: 将logstash的安装包复制到需要的机器上去
+#  copy: src=templates/logstash-7.3.2.zip dest=/data/logstash-7.3.2.zip owner=root group=root mode=0755
+
+- name: 下载并解压对应的安装包,下载很慢，改用本地的安装包
+  unarchive:
+    copy: no
+    creates: /data/logstash/logstash-7.3.2/LICENSE.txt
+    dest: /data/logstash/
+    src: https://artifacts.elastic.co/downloads/logstash/logstash-7.3.2.tar.gz
+#    src: /data/logstash-7.3.2.zip
+  notify:
+    - start logstash
+
+

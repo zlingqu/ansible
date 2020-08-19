@@ -1,0 +1,50 @@
+- name: install java-1.7.0-openjdk
+  yum:
+    name: java-1.7.0-openjdk
+    state: present
+- name: create mycat user
+  user:
+    name: mycat
+    state: present
+
+- name: trasfer {{ mtls_mycat  }} to remonte host
+  unarchive:
+    src: "{{ mtls_mycat }}" 
+    dest: /usr/local/
+    owner: mycat
+    group: mycat
+    creates: /usr/local/mycat
+- name: export MYCAT_HOME env to /etc/profile
+  lineinfile:
+    path: /etc/profile
+    line: export MYCAT_HOME=/usr/local/mycat/
+    insertafter: EOF 
+
+- name: config schema.xml
+  template:
+    src: schema.xml.j2
+    dest: /usr/local/mycat/conf/schema.xml
+  notify:
+  - 重新加载 mycat
+
+- name: config server.xml
+  template:
+    src: server.xml.j2
+    dest: /usr/local/mycat/conf/server.xml
+  notify:
+  - 重新加载 mycat
+
+
+- name: start mycat
+  shell: "source /etc/profile && cd /usr/local/mycat/bin && ./mycat start"
+  ignore_errors: yes
+
+- name: 开机自动启动
+  lineinfile: 
+    path: /etc/rc.local
+    line: "source /etc/profile && cd /usr/local/mycat/bin && ./mycat start"
+
+- name: rc.local添加x权限
+  file:
+    path: /etc/rc.d/rc.local
+    mode: +x

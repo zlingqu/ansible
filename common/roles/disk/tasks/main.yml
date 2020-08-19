@@ -1,0 +1,30 @@
+#- name: 分区磁盘
+#  parted: device=/dev/{{ dev_name }}  number=0 state=present
+#  when: not {{ dev_name }}.partitions
+#  register: status
+
+- name: 保证挂载点有效
+  file:
+    path: "{{ mount_dest }}"
+    state: directory
+
+- name: 格式化磁盘{{dev_name}}为文件系统{{ dev_fstype }}
+  filesystem: 
+    dev: /dev/{{ dev_name }}
+    fstype: "{{ dev_fstype }}"
+
+- name: 获取setup:gather_subset:hardware
+  setup:
+    gather_subset:
+    - hardware
+- name: debug
+  debug: 
+    msg: "{{ ansible_devices.vdb.links.uuids[0] }}"
+- name: 添加自动挂载
+  mount:
+    path: "{{ mount_dest }}"
+    src: UUID={{ ansible_devices.vdb.links.uuids[0] }}
+    fstype: "{{ dev_fstype }}"
+    state: mounted
+#state: present 添加fstab,但不会挂载
+#state: mounted 添加fstab,并挂载

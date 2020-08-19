@@ -1,0 +1,9 @@
+version: "3"
+services:
+  media-gateway:
+    image: rdac-docker.dm-ai.cn/xmc2-chongwen/media-gateway:master-13-56e16f6aaeb29952aacd69cddff8ab656a749745
+    ports:
+      - "10000:80"
+    volumes:
+      - "/data/log/log.conf:/src/debug/log.conf"
+      - "/data/log/config.json:/src/debug/config.json"

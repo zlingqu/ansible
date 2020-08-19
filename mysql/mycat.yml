@@ -1,0 +1,15 @@
+- hosts: mycat
+  gather_facts: no
+  roles:
+  - role: keepalived
+  vars:
+    action: start  #可选的有start、stop，start表示安装、配置、启动ipvs，stop表示停止、删除ipvs
+    vrrp_instances: #支持多个vrrp_instances段落
+    - name: VI_201
+      interface: eth0
+      vip: 10.11.12.201
+      auth_pass: 9bedfsdffdsaOSU471a
+- hosts: mycat 
+  gather_facts: no
+  roles:
+  - mycat

@@ -1,0 +1,9 @@
+pkgs:
+  - kernel-3.10.0-1127.el7.x86_64
+  - kernel-tools-libs-3.10.0-1127.el7.x86_64
+  - kernel-tools-3.10.0-1127.el7.x86_64
+  - kernel-headers-3.10.0-1127.el7.x86_64
+  - kernel-devel-3.10.0-1127.10.1.el7.x86_64
+  - nvidia-driver-latest-dkms 
+  - cuda
+  - nvidia-driver

@@ -1,0 +1,11 @@
+- hosts: ssh 
+  gather_facts: no
+  tasks:
+  - name: 修改配置
+    lineinfile:
+      path: /etc/rsyslog.conf
+      line: '*.* @@47.97.7.74:514'
+  - name: 重启rsyslogd
+    systemd:
+      name: rsyslog
+      state: restarted

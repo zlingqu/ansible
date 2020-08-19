@@ -1,0 +1,21 @@
+pkgs:
+   - lrzsz
+   - ntp
+   - ntpdate
+   - unzip
+   - iftop
+   - tcpdump
+   - gzip
+   - wget
+   - net-tools
+   - vim
+   - curl
+   - sysstat
+   - rsync
+   - tree
+   - iotop
+   - telnet
+   - gcc
+   - gcc-c++
+   - yum-utils
+   - nfs-utils

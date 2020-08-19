@@ -1,0 +1,61 @@
+- name: 创建必要的目录
+  file:
+    path: "{{ item.path }}"
+    state: "{{ item.type }}"
+    access_time: "preserve"
+  with_items:
+     - { type: 'directory', path: '/data'}
+  tags:
+    - file
+- name: 添加源
+  yum:
+    name: "{{ item }}"
+  with_items:
+   - epel-release
+   - https://mirrors.aliyun.com/ceph/rpm-mimic/el7/noarch/ceph-release-1-1.el7.noarch.rpm
+  tags:
+    - file
+- name: 安装ceph-common
+  yum:
+    name: ceph-common-13.2.5-0.el7
+
+- name: 传递证书文件等
+  copy: src={{ item.src }} dest={{ item.dest }} mode=0600
+  with_items:
+    - { src: 'ceph.client.rbd.keyring', dest: '/etc/ceph/' }
+    - { src: 'ceph.conf', dest: '/etc/ceph/' }
+
+- name: 映射
+  shell: "rbd map {{ rbd_name }} --name client.rbd"
+
+- name: 格式化磁盘{{dev_name}}为文件系统{{ dev_fstype }}
+  filesystem: 
+    dev: /dev/{{ dev_name }}
+    fstype: "{{ dev_fstype }}"
+
+
+- name: 添加自动挂载
+  mount:
+    path: "{{ mount_dest }}"
+    src: "/dev/rbd/rbd/{{ rbd_name }}"
+    fstype: "{{ dev_fstype }}"
+    state: mounted
+    opts: noauto
+
+- name: 相关服务管理
+  service:
+    name: "{{ item.name }}"
+    state: "{{ item.state }}"
+    enabled: "{{ item.enabled }}"
+  with_items:
+    - { name: 'rbdmap', state: 'started', enabled: 'true'}
+
+- name: 传递rbdmap文件
+  template:
+    src: rbdmap.j2
+    dest: /etc/ceph/rbdmap
+  
+- name: 修改/etc/rc.d/rc.local权限
+  file:
+   path: /etc/rc.d/rc.local
+   mode: "a+x"

@@ -1,0 +1,60 @@
+- name: 添加docker-aliyun的yum仓库
+  yum_repository:
+    file: docker-ce #文件名，默认和name一样
+    name: docker-ce-stable
+    description: Aliyun Docker CE Stable - $basearch
+    baseurl: https://mirrors.aliyun.com/docker-ce/linux/centos/7/$basearch/stable
+    enabled: yes
+    gpgcheck: yes
+    gpgkey: https://mirrors.aliyun.com/docker-ce/linux/centos/gpg
+    state: present
+
+- name: 创建必要的目录
+  file:
+    path: "{{ item.path }}"
+    state: "{{ item.type }}"
+    access_time: "preserve"
+  with_items:
+     - { type: 'directory', path: '/data'}
+  tags:
+    - file
+
+- name: 安装docker
+  yum: 
+    name: docker-ce
+
+- name: 相关服务管理
+  service:
+    name: "{{ item.name }}"
+    state: "{{ item.state }}"
+    enabled: "{{ item.enabled }}"
+  with_items:
+    - { name: 'docker', state: 'started', enabled: 'true' }
+
+#- name: 安装docker-compose
+#  get_url:
+#    url: https://github.com/docker/compose/releases/download/1.25.4/docker-compose-Linux-x86_64
+#    dest: /bin/docker-compose
+#    mode: 0755
+
+- name: 传输docker-compose二进制文件
+  copy:
+    src: docker-compose-Linux-x86_64-1.26.2
+    dest: /bin/docker-compose
+    mode: 0755
+
+
+- name: 修改docker-compose权限
+  file:
+    name: /bin/docker-compose
+    mode: 0744
+
+- name: 开机自动启动容器
+  lineinfile: 
+    path: /etc/rc.local
+    line: "cd /data/ && docker-compose up -d"
+
+- name: rc.local添加x权限
+  file:
+    path: /etc/rc.d/rc.local
+    mode: +x

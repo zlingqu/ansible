@@ -1,0 +1,31 @@
+#是否给mysql用户加密码
+mtls_make_mysql_secure: 1
+#mysql 安装包的名字
+#mysql_package: mysql-5.6.44-linux-glibc2.12-x86_64.tar.gz
+mysql_package: mysql-5.7.28-linux-glibc2.12-x86_64.tar.gz
+#mysql_package: mysql-8.0.16-linux-glibc2.12-x86_64.tar.xz
+#linux 系统级别mysql用户相关信息
+mysql_user: mysql
+mysql_group: mysql
+mysql_user_uid: 3306
+mysql_user_gid: 3306
+#mysql 安装目录
+mysql_base_dir: /usr/local/mysql/
+#mysql 真正的datadir就会是mysql_data_dir_base+mysql_port
+mysql_data_dir_base: /data/mysql/
+mysql_port: 3306
+mysql_root_password: mtls0352
+
+#mysql 配置文件模版
+mysql_binlog_format: row
+mysql_innodb_log_files_in_group: 16
+mysql_innodb_log_file_size: 256M
+mysql_innodb_log_buffer_size: 64M
+mysql_innodb_open_files: 65535
+mysql_max_connections: 1000
+mysql_thread_cache_size: 256
+mysql_sync_binlog: 1
+mysql_binlog_cache_size: 64K
+mysql_innodb_online_alter_log_max_size: 128M
+mysql_performance_schema: 'on'
+use_write_set: 1

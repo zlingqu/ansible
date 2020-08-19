@@ -1,0 +1,13 @@
+- name: 提供主配置文件
+  template:
+    src: server.properties.j2
+    dest: "{{ app_dir }}/config/server.properties"
+
+- name: 提供生产者配置文件
+  template:
+    src: producer.properties.j2
+    dest: "{{ app_dir }}/config/producer.properties"
+- name: 提供消费者配置文件
+  template:
+    src: consumer.properties.j2
+    dest: "{{ app_dir }}/config/consumer.properties"

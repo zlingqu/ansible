@@ -1,0 +1,60 @@
+- name: 分发cm的rpm包
+  copy:
+    src: "{{cm_cache_dir}}/{{ item }}"
+    dest: /tmp
+  with_items:
+  - "{{ cm_rpm }}"
+
+- name: 服务端安装
+  yum:
+    name: 
+      - /tmp/{{ cm_rpm }}
+      - cloudera-manager-agent 
+      - cloudera-manager-server
+    enablerepo: Cloudera-Manager
+  when: "'cdh-server' in group_names"
+
+- name: 客户端安装 
+  yum:
+    name:
+      - /tmp/{{ cm_rpm }}
+      - cloudera-manager-agent 
+  when: "'cdh-agent' in group_names"
+
+- name: 修改agent配置文件
+  lineinfile:
+    path: /etc/cloudera-scm-agent/config.ini 
+    regexp: '^server_host'
+    line: server_host={{groups['cdh-server'][0]}}
+  tags: agent-conf
+
+- name: 修改agent配置文件
+  lineinfile:
+    path: /etc/cloudera-scm-agent/config.ini 
+    regexp: 'reported_hostname'
+    line: reported_hostname={{ hostname }}
+  tags: agent-conf
+
+- name: 启动 agent 服务，并设置自启动
+  systemd:
+    name: cloudera-scm-agent
+    daemon_reload: yes
+    state: started
+    enabled: yes
+  tags: server
+
+
+- name: 创建目录/usr/share/java
+  file:
+    path: /usr/share/java
+    state: directory
+
+- name: 传递mysql-connector-java.jar
+  copy:
+    src: mysql-connector-java-5.1.46.jar 
+    dest: /usr/share/java/mysql-connector-java.jar
+
+- name: 初始化数据库
+  shell: "/opt/cloudera/cm/schema/scm_prepare_database.sh mysql -h {{ db_host }} -P {{ db_port }} --scm-host {{groups['cdh-server'][0]}} {{ db_name }} {{ db_user }} {{ db_password }} "
+  when: "'cdh-server' in group_names"
+  tags: db

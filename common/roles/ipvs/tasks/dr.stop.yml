@@ -1,0 +1,7 @@
+- name: 卸载 keepalived、ipvsadm
+  yum:
+    name: "{{ item }}"
+    state: absent
+  with_items:
+    - keepalived
+    - ipvsadm

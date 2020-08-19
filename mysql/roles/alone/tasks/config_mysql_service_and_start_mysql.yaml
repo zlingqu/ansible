@@ -1,0 +1,19 @@
+  - name: create systemd config file
+    when: ansible_distribution_major_version == "7"
+    template:
+     src: mysql.service.j2
+     dest: /usr/lib/systemd/system/mysql.service
+
+  - name: start mysql(sytemctl)
+    when: ansible_distribution_major_version == "7"
+    systemd:
+     name: mysql
+     state: started
+     daemon_reload: yes
+
+  - name: config mysql.service start up on boot
+    when: ansible_distribution_major_version == "7"
+    systemd:
+     name: mysql
+     enabled: yes
+     daemon_reload: yes

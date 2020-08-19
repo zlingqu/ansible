@@ -1,0 +1,19 @@
+[mysql-prd]
+10.11.12.4 host=mysql-10-11-12-4
+10.11.12.5 host=mysql-10-11-12-5
+10.11.12.6 host=mysql-10-11-12-6
+
+[mysql-master-slave]
+10.11.12.4 role=master
+10.11.12.5 role=slave
+10.11.12.6 role=slave
+[mysql-master-slave:vars]
+master_ip = 10.11.12.4
+
+[mycat]
+10.11.12.5
+10.11.12.6
+[mycat:vars]
+master_ip = 10.11.12.4
+slave_ips = ["10.11.12.5","10.11.12.6"]
+mysql_port = 3306

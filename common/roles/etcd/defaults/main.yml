@@ -1,0 +1,7 @@
+# etcd 集群间通信的IP和端口, 根据etcd组成员自动生成
+etcd_tmp_nodes: "{% for ip in ansible_play_batch %}etcd-{{ hostvars[ip]['etcd_node'] }}=https://{{ ip }}:2380,{% endfor %}" 
+etcd_nodes: "{{ etcd_tmp_nodes.rstrip(',') }}"
+
+cluster_staus: "new"
+
+ETCD_VER: v3.4.3

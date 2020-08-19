@@ -1,0 +1,5 @@
+- hosts: "{{ group }}"
+  gather_facts: no
+  roles:
+  - role: prometheus/dcgm_exporter
+## ansible-playbook dcgm_exporter.yml -e group=

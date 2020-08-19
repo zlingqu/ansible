@@ -1,0 +1,43 @@
+---
+#一个通用的jar部署程序，需要先将jar部署成系统服务的形式
+#例如：ansible-playbook -i hosts update-jar.yml -e "host_name=gray-jar pname=louxe-oss-weixin src_dir=/root/.jenkins/workspace/louxe-oss-weixin.jar/target"
+#如果是在jenkins中使用，可使用相关系统变量。ansible-playbook -i hosts update-jar.yml -e "host_name=gray-jar pname=$pname src_dir=$WORKSPACE/target"
+- hosts: "{{host_name}}"
+  gather_facts: false  #不采集系统信息，有利于加速访问
+  remote_user: root
+  serial: 1  #串行执行
+  vars:
+    - dest_dir: /rebuild/{{pname}}
+    - bak_dir: /rebuild/backup
+    - user_name: lx2
+  tasks:
+   - name: 1 目的主机中，备份文件{{dest_dir}}/{{pname}}.jar到目录{{bak_dir}}下
+       #如果不需要可以注释掉这一步
+     become: yes
+     become_user: '{{user_name}}'
+     shell: cp {{dest_dir}}/{{pname}}.jar {{bak_dir}}/{{pname}}.jar.`date "+%Y-%m-%d-%H-%M"`
+
+   - name: 2 同步本地文件{{src_dir}}/{{pname}}.jar到目的主机的{{dest_dir}}/{{pname}}.jar
+     copy: 
+       src={{src_dir}}/{{pname}}.jar 
+       dest={{dest_dir}}
+       owner={{user_name}}
+       group={{user_name}}
+       mode=0744
+   - name: 3 保证日志文件的权限正常
+    #如果通过其他方式解决了，此步可以不配置
+     file: 
+       path={{dest_dir}}/{{pname}}.log
+       state=touch
+       owner={{user_name}}
+       group={{user_name}}
+   - name: 4 重新启动 the jar server
+     service:
+       name={{pname}}
+       state=restarted
+   - name: 5 检查服务是否运行
+     shell: service {{pname}} status
+     register: status
+   - name: 6 显示检查的结果
+     debug: msg="{{status.stdout}}"
+...

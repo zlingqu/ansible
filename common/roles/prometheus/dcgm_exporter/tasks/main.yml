@@ -1,0 +1,32 @@
+- name: mkdir /etc/dcgm-exporter
+  file:
+    path: /etc/dcgm-exporter
+    state: directory
+- name: copy dcgm
+  copy:
+    src: "{{ item.src }}" 
+    dest: "{{ item.dest }}"
+    mode: preserve
+  with_items:
+  - { src: 'datacenter-gpu-manager-1.7.2-1.x86_64.rpm', dest: '/tmp/dcgm.rpm' }
+  - { src: 'dcp-metrics-included.csv', dest: '/etc/dcgm-exporter/dcp-metrics-included.csv' }
+  - { src: 'default-counters.csv', dest: '/etc/dcgm-exporter/default-counters.csv' }
+  - { src: 'dcgm-export.service', dest: '/usr/lib/systemd/system/dcgm-export.service' }
+  - { src: 'dcgm-exporter', dest: '/usr/bin/dcgm-exporter' }
+
+- name: install dcgm
+  yum:
+    name: /tmp/dcgm.rpm
+
+- name: delete /tmp/dcgm.rpm
+  file:
+    path: /tmp/dcgm.rpm
+    state: absent
+
+
+- name: start dcgm-export
+  systemd:
+    name: dcgm-export
+    state: started
+    enabled: yes
+    daemon_reload: yes

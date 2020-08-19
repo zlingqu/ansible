@@ -1,0 +1,17 @@
+- name: 传输脚本
+  template:
+    src: prom-update.sh.j2
+    dest: /tmp/prom-update.sh
+
+- name: 执行脚本
+  shell: bash /tmp/prom-update.sh
+
+- name: 删除脚本
+  file:
+    path: /tmp/prom-update.sh
+    state: absent
+
+- name: 删除脚本
+  file:
+    path: /tmp/config.yml
+    state: absent

@@ -1,0 +1,16 @@
+- name: 配置realserver
+  include: dr.start.yml
+  when: role == 'dr' and action == 'start'
+
+- name: 配置realserver
+  include: dr.stop.yml
+  when: role == 'dr' and action == 'stop'
+
+
+- name: 配置realserver
+  include: rr.start.yml
+  when: role == 'rr' and action == 'start'
+
+- name: 配置realserver
+  include: rr.stop.yml
+  when: role == 'rr' and action == 'stop'

@@ -1,0 +1,7 @@
+---
+- hosts: "{{ group }}"
+  gather_facts: no
+  become: yes
+  roles:
+  - role: gpu-driver
+#ansible-playbook gpu-driver.yml -e group=gpu-driver

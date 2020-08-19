@@ -1,0 +1,8 @@
+mysql_package: mysql-5.7.28-linux-glibc2.12-x86_64.tar.gz
+#mysql_package: mysql-8.0.16-linux-glibc2.12-x86_64.tar.xz
+
+mysql_rple_user: repl
+mysql_rple_password: repl0352
+
+mysql_port: 3306
+mysql_root_password: mtls0352

@@ -1,0 +1,12 @@
+- hosts: mongo-rs
+  gather_facts: no
+  roles:
+  - mongodb/repli_set
+  #- mongodb/stand_alone
+  vars:
+    base_dir: /data/mongo-x4c
+    PORT: 27300 
+    root_user_name: admin
+    root_user_passwd: 42833ec473f43d
+    read_user_name: read
+    read_user_passwd: cDFd3649DT84

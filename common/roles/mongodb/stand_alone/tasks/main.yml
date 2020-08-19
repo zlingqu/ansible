@@ -1,0 +1,77 @@
+- name: 创建目录
+  file: 
+    path: "{{ data_dir}}"
+    state: directory
+
+- name: 传递repo文件
+  copy: src={{ item.src }} dest={{ item.dest }} mode=0600
+  with_items:
+    - { src: 'mongodb-4.repo', dest: '/etc/yum.repos.d/Mongodb-4.repo' }
+  tags:
+    - repo
+
+- name: 安装一些必要的包 for yum
+  yum:
+    name: mongodb-org-{{ version }}
+    state: present
+  tags:
+    - yum
+- name: 相关服务管理
+  service:
+    name: "{{ item.name }}"
+    state: "{{ item.state }}"
+    enabled: "{{ item.enabled }}"
+  with_items:
+    - { name: 'mongod', state: 'stopped', enabled: 'false' }
+
+- name: 提供相关文件
+  template: src={{ item.src }} dest={{ item.dest }}
+  with_items:
+    - { src: 'config_init.j2', dest: "{{ config_file }}" }
+    - { src: 'create_user.j2', dest: '/tmp/create_user.js' }
+  tags:
+    - file
+
+- name: 启动mongodb
+  shell: "{{ item }}"
+  with_items:
+    - echo never > /sys/kernel/mm/transparent_hugepage/enabled
+    - echo never > /sys/kernel/mm/transparent_hugepage/defrag
+    - mongod -f {{ config_file }}
+  ignore_errors: yes
+
+- wait_for:
+    port: "{{ PORT }}"
+    delay: 5
+
+- name: 创建用户
+  shell: sleep 50 && /usr/bin/mongo "localhost:{{ PORT }}/admin" /tmp/create_user.js
+  ignore_errors: yes
+
+- name: 停止服务
+  shell: kill `ps -ef|grep {{ config_file }}|grep -v grep |awk '{print $2}'`
+  ignore_errors: yes
+
+- name: 提供带有认证信息的配置文件
+  template: src=config.j2 dest={{ config_file }}
+
+- name: 启动mongodb
+  shell: sleep 10 && mongod -f {{ config_file }}
+
+- wait_for:
+    port: "{{ PORT }}"
+    delay: 5
+
+- name: 修改开机脚本
+  lineinfile: 
+    path: /etc/rc.local
+    line: "{{ item }}"
+  with_items:
+    - echo never > /sys/kernel/mm/transparent_hugepage/enabled
+    - echo never > /sys/kernel/mm/transparent_hugepage/defrag
+    - mongod -f {{ config_file }}
+
+- name: rc.local添加执行权限
+  file:
+    path: /etc/rc.d/rc.local
+    mode: +x

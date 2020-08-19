@@ -1,0 +1,19 @@
+- name: 添加k8s-aliyun的yum 仓库
+  yum_repository:
+    name: k8s
+    description: aliyun_k8s
+    baseurl: https://mirrors.aliyun.com/kubernetes/yum/repos/kubernetes-el7-x86_64/
+    enabled: yes
+    gpgcheck: yes
+    gpgkey: https://mirrors.aliyun.com/kubernetes/yum/doc/rpm-package-key.gpg
+    state: present
+- name: 添加docker-aliyun的yum仓库
+  yum_repository:
+    file: docker-ce #文件名，默认和name一样
+    name: docker-ce-stable
+    description: Aliyun Docker CE Stable - $basearch
+    baseurl: https://mirrors.aliyun.com/docker-ce/linux/centos/7/$basearch/stable
+    enabled: yes
+    gpgcheck: yes
+    gpgkey: https://mirrors.aliyun.com/docker-ce/linux/centos/gpg
+    state: present

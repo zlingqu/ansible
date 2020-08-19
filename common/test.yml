@@ -1,0 +1,9 @@
+- hosts: local
+  gather_facts: no
+  tasks:
+  - name: setup
+    setup:
+      filter: ansible_memtotal_mb
+  - name: debug
+    debug:
+      msg: "var =  {{ ansible_memtotal_mb }}"

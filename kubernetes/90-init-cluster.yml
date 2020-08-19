@@ -1,0 +1,57 @@
+# 校验节点软件系统及硬件系统、安装必要基础组件、docker、kubeadm、kubelet、kubectl
+- hosts: 
+  - all
+  roles:
+  - prepare/base
+  - prepare/docker
+  - prepare/kubernetes
+
+# 进行apiserver负载均衡
+- hosts: 
+  - all
+  roles:
+  - role: load-balancer
+
+# 安装etcd，并分发etcd证书到master节点
+- hosts: 
+  - etcd
+  - new-etcd
+  - kube-master
+  - new-master
+  roles:
+  - etcd/certificates
+  - etcd/install
+
+# 生成master节点证书，初始化master节点
+- hosts: 
+  - kube-master
+  - new-master
+  roles:
+  - kube-master/certificates
+  - kube-master/install
+
+# 初始化worker节点
+- hosts: 
+  - kube-worker
+  - new-worker
+  roles:
+  - kube-worker
+
+# 标记各节点角色
+- hosts: 
+  - kube-master
+  - kube-worker
+  - new-master
+  - new-worker
+  roles:
+  - post
+
+# 安装基础插件
+- hosts: 
+  - kube-master[0]
+  roles:
+  - plugins/network-plugins
+  #- plugins/ingress-controller
+  #- plugins/metrics-server
+  #- plugins/kubernetes-dashboard
+  #- plugins/cert-manager

@@ -1,0 +1,14 @@
+- name: 下载并解压 zk
+  unarchive:
+    remote_src: yes
+    src: "{{ url }}"
+    dest: /usr/local
+    creates: "{{ app_dir }}"
+- name: 保证相关目录有效
+  file:
+    path: "{{ item }}"
+    state: directory
+  with_items:
+    - "{{ app_dir }}"
+    - "{{ data_dir }}"
+    - "{{ log_dir }}"

@@ -1,0 +1,5 @@
+- name: restart kafka
+  shell: "bin/kafka-server-stop.sh && sleep 20 && ./bin/kafka-server-start.sh -daemon config/server.properties"
+  args:
+    chdir: "{{ app_dir }}"
+  

@@ -1,0 +1,56 @@
+- name: 创建必要的目录
+  file:
+    path: "{{ item.path }}"
+    state: "{{ item.type }}"
+  with_items:
+     - { type: 'directory', path: '/data'}
+     - { type: 'directory', path: '/data/mysql8'}
+
+- name: 添加yum仓库
+  yum:
+    name: https://dev.mysql.com/get/mysql80-community-release-el7-3.noarch.rpm
+  tags:
+  - yum
+
+- name: 安装mysql
+  yum:
+    name: mysql-community-server 
+  tags:
+  - yum
+
+- name: setup
+  setup:
+    filter: ansible_memtotal_mb
+
+- name: 提供配置文件
+  template: 
+    src: my.cnf.j2
+    dest: /etc/my.cnf
+
+- name: 启动mysql
+  service:
+    name: mysqld
+    state: started
+    enabled: yes 
+
+- name: 停止postfix
+  service:
+    name: postfix
+    state: stopped
+    enabled: no 
+
+
+- name: 获取初始化密码
+  shell: grep "root@localhost" /var/log/mysqld.log |awk '{print $NF}'|tail -1
+  register: passwd
+  #run_once: true
+  tags: shell
+
+- name: debug
+  debug:
+    msg: "var =  {{ passwd.stdout }}"
+  tags: shell
+
+- name: 修改密码
+  shell: mysql --connect-expired-password -p'{{ passwd.stdout }}' -e "ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '{{root_passwd}}'"
+  ignore_errors: yes

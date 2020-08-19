@@ -1,0 +1,93 @@
+- name: 修改limits
+  pam_limits:
+    limit_type: "{{ item.type }}"
+    limit_item: "{{ item.item }}"
+    domain: '*'
+    value: 65535
+  with_items:
+    - { type: 'hard', item: 'nofile' }
+    - { type: 'hard', item: 'nproc' }
+    - { type: 'soft', item: 'nofile' }
+    - { type: 'soft', item: 'nproc' }
+
+- name: 安装epel源
+  yum:
+    name: epel-release
+
+- name: 安装一些包
+  yum: update_cache=yes name={{ item }} state=present
+  with_items:
+  - wget
+  - ntp
+  - ntpdate
+  - git
+  - tar
+  - rpcbind
+  - telnet
+  - vim
+  - net-tools
+  - bind-utils
+  - lrzsz
+  - bash-completion
+
+
+- name: 关闭 selinux
+  selinux: state=disabled
+  
+- name: 修改 /etc/hosts 文件
+  blockinfile:
+    path: /etc/hosts
+    block: |-
+      {% for item in ansible_play_batch %}
+      {{ item }} {{ hostvars[item]['hostname'] }}
+      {% endfor %}
+    state: present
+    create: yes
+    backup: no
+    marker: "# Ansible inventory hosts {mark}"
+  tags: hosts
+  
+
+# Cloudera 建议将 /proc/sys/vm/swappiness 设置为最大值 10
+- name: 设置vm.swappiness={{ v_vm_swappiness }}
+  sysctl:
+    name: "{{ item.name }}"
+    value: "{{ item.value }}"
+    state: present
+    sysctl_set: yes #使用systctl 命令立即生效
+  with_items:
+    - {name: 'vm.swappiness', value: '{{vm_swappiness}}' }
+  tags: sysctl
+
+- name: 禁用透明大页面压缩
+  shell: "echo never > /sys/kernel/mm/transparent_hugepage/defrag && \
+          echo never > /sys/kernel/mm/transparent_hugepage/enabled"
+
+- name: 永久禁用透明大页面压缩
+  lineinfile:
+    dest: /etc/rc.local
+    regexp: "transparent_hugepage"
+    line: "echo never > /sys/kernel/mm/transparent_hugepage/defrag && echo never > /sys/kernel/mm/transparent_hugepage/enabled"
+
+
+- name: 添加cm的yum 仓库
+  yum_repository:
+    name: Cloudera-Manager #文件名/etc/yum.repos.d/{{name}}.repo ,也是文件中[]的名字
+    description: Cloudera Manager {{ cm_ver_2 }}
+    baseurl: https://archive.cloudera.com/cm{{ cm_ver_1 }}/{{ cm_ver_2 }}/redhat7/yum/
+    gpgkey: https://archive.cloudera.com/cm{{ cm_ver_1 }}/{{ cm_ver_2 }}/redhat7/yum/RPM-GPG-KEY-cloudera
+    enabled: yes
+    gpgcheck: yes
+    state: present
+  tags: 
+  - yum
+
+# ssh相关，server对agent可信
+- name: ssh
+  include: ssh.yml
+  tags: ssh
+
+###  jdk相关
+- name: 安装 JDK
+  include: jdk.yml
+  tags: jdk

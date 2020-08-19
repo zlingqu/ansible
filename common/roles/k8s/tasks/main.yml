@@ -1,0 +1,120 @@
+- name: 创建必要的目录
+  file:
+    path: "{{ item.path }}"
+    state: "{{ item.type }}"
+  with_items:
+     - { type: 'directory', path: '/etc/docker'}
+     - { type: 'directory', path: '/etc/kubernetes/manifests'}
+
+- name: 添加yum仓库
+  include: yum.yml
+  tags:
+  - repo
+
+- name: ceph包相关处理
+  include: ceph-13.2.5.yml
+  when:
+  - inventory_hostname in groups['k8s-prd']
+  tags:
+   - ceph
+
+- name: 安装一些必要的包 for yum
+  yum:
+    name: "{{ pkgs }}"
+    state: present
+  tags:
+    - yum
+
+- name: docker配置文件提供
+  template:
+    src: daemon.json.j2
+    dest: "/etc/docker/daemon.json"
+  notify:
+  - 重新加载 daemon
+  # - 重新启动 docker
+  tags:
+    - file
+
+- name: 修改 /etc/hosts 文件
+  blockinfile:
+    path: /etc/hosts
+    block: |-
+      {% for item in ansible_play_batch %}
+      {{ item }} {{ hostvars[item]['host'] }}
+      {% endfor %}
+    state: present
+    create: yes
+    backup: no
+    marker: "# Ansible inventory hosts {mark}"
+  tags:
+    - hosts
+
+- name: 相关服务管理
+  service:
+    name: "{{ item.name }}"
+    state: "{{ item.state }}"
+    enabled: "{{ item.enabled }}"
+  with_items:
+    - { name: 'docker', state: 'started', enabled: 'true' }
+    - { name: 'kubelet', state: 'started', enabled: 'true'}
+    - { name: 'postfix', state: 'stopped', enabled: 'false' }
+    - { name: 'firewalld', state: 'stopped', enabled: 'false' }
+
+- name: 禁止selinux
+  selinux:
+    state: disabled
+#自动修改/etc/selinux/config文件
+
+- name: 修改/etc/fstab，取消swap挂载
+  lineinfile:
+    path: /etc/fstab
+    regexp: '^UUID(.*)swap(.*)'
+    backrefs: yes #如果正则匹配不到，不进行任何操作，默认false
+    line: '#UUID\1swap\2' #行前添加#,\1 \2前向引用
+  tags: swapoff
+
+- name: 禁用系统 swap
+  shell: "swapoff -a" 
+  ignore_errors: true
+  tags:
+    - swapoff
+
+
+- name: 获取ansible_memtotal_mb
+  setup:
+    filter: ansible_memtotal_mb
+  tags: sysctl
+
+- name: 设置vm.swappiness=0
+  sysctl:
+    name: "{{ item.name }}"
+    value: "{{ item.value }}"
+    state: present
+    sysctl_set: yes #使用systctl 命令立即生效
+    sysctl_file: /usr/lib/sysctl.d/00-system.conf  #添加到此文件，默认是/etc/sysctl.conf
+  with_items:
+    - {name: 'vm.swappiness', value: '0'}
+    - {name: 'net.ipv4.ip_forward', value: '1'}
+    - {name: 'net.bridge.bridge-nf-call-iptables', value: '1'}
+    - {name: 'net.bridge.bridge-nf-call-ip6tables', value: '1'}
+    - {name: 'vm.min_free_kbytes', value: '{{ (ansible_memtotal_mb // 1024  // 8 + 1 ) * 250 * 1024  }}'}
+    - {name: 'net.core.somaxconn', value: '32768'}
+    - {name: 'kernel.watchdog_thresh',value: '20'}
+  tags: sysctl
+
+- name: 设置定时任务，清理docker image
+  cron:
+    weekday: 0
+    hour: 5
+    minute: 0
+    job: "docker system prune -f"
+    name: delete docker images
+  tags:
+    - cron
+
+
+# 内核模块调整
+- name: ipvs相关配置
+  include: ipvs.yml
+  tags:
+  - ipvs

@@ -1,0 +1,6 @@
+{
+    "MediaAccessIP" : "media-access.xmc2-chongwen.dm-ai.cn",
+    "HttpWorks" : 10,
+    "HttpPort": 80,
+    "MediaAccessPort": 80
+}

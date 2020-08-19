@@ -1,0 +1,9 @@
+- name: 开机自动启动zk
+  lineinfile: 
+    path: /etc/rc.local
+    line: "export JAVA_HOME=/usr/local/jdk && cd {{ app_dir }} && ./bin/zkServer.sh start"
+
+- name: rc.local添加执行权限
+  file:
+    path: /etc/rc.d/rc.local
+    mode: +x

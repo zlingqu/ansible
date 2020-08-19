@@ -1,0 +1,9 @@
+- hosts: "{{ group }}"
+  gather_facts: no
+  roles:
+  - role: cephrbd 
+  vars:
+    dev_name: rbd0
+    mount_dest: /opt
+    dev_fstype: xfs
+# ansible-playbook cephrbd.yml -e group=disk

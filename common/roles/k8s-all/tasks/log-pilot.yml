@@ -1,0 +1,2 @@
+- name: 执行脚本
+  shell: export KUBECONFIG=/etc/kubernetes/admin.conf && kubectl apply -f https://gitlab.dm-ai.cn/application-engineering/devops/deployment/raw/dev/kube-system/all/log-pilot.yml?private_token=zXswJbwzgd3Smarcd4pD

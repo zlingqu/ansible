@@ -1,0 +1,25 @@
+systemLog:
+  destination: file
+  logAppend: true
+  path: {{ log_file }}
+
+storage:
+  dbPath: {{ data_dir }}
+  journal:
+    enabled: true
+  wiredTiger:
+    engineConfig:
+      cacheSizeGB: {{ mem_size }}
+
+processManagement:
+  fork: true
+  pidFilePath: {{ pid_file }}
+  timeZoneInfo: /usr/share/zoneinfo
+
+net:
+  port: {{ PORT }}
+  bindIp: {{ IP }} 
+
+
+replication:
+  replSetName: {{ replset_name }}

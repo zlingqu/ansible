@@ -1,0 +1,18 @@
+- name: mongo端口白名单
+  iptables:
+    chain: INPUT
+    source: 192.168.3.200,127.0.0.1,192.168.66.100
+    #source: 192.168.12.0/24,192.168.13.0/24
+    destination_port: 22
+    protocol: tcp
+    jump: ACCEPT
+    action: insert
+    state: "{{ state }}"
+- name: mongo端口黑名单
+  iptables:
+    chain: INPUT
+    destination_port: 22
+    protocol: tcp
+    jump: DROP
+    action: append
+    state: "{{ state }}"

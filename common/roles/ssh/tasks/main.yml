@@ -1,0 +1,5 @@
+- name: ssh-key添加或者删除
+  lineinfile :
+    path: /root/.ssh/authorized_keys
+    state: "{{ delete_or_add }}"
+    line: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDAyTVI7OrjkdgI/3Oo6eUPvHe2ncRO6Fuvo4YPDEzXQvKEaQ1Gd7kCaPnzzzZx4ap0i4hj1iDrLFO9gBBbjJtC3MPNeNflrXhOsHE1+K9ET9te3g7G97PAAqci8qRhTIuDKqUia+N2Jlxa6aXh1eHCyEBL5B1aEslKMUqCTGkqPvW0WNnBWG0tbv9yBDpfxNFRZg36/I+pxeFKT8J955XAJETuMGksdh8TawhZaqhX6mvjiKUws3qPZc+apbfrgDkDNZjeZBLL56uYrlEm9sP43THTJf8q5PHJqrVUMNoNQzWB6Fl7ZFE8kqFHxu8Zs2NlIXbsdbTyBlbyBMOo6t2z key-with-pass@devops"

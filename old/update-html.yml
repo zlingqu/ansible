@@ -1,0 +1,21 @@
+---
+- hosts: "{{host_name}}"
+  gather_facts: false
+  remote_user: root
+  vars:
+#通用脚本，变量通过-e 传递进来，例如ansible-playbook -i hosts update-html.yml -e "pname=$pname src_dir=$WORKSPACE"
+    - dest_dir:  /data/www/{{pname}}
+    - back_dir: /data/backup
+  tasks:
+   - name: 1 backup html
+     shell: cp -r /data/www {{back_dir}}/www.`date +"%Y-%m-%d-%H-%M"`
+     ignore_errors: yes
+
+   - name: 2 sync file to dest {{dest_dir}}
+     synchronize: 
+       src={{src_dir}}/
+       dest={{dest_dir}} 
+       delete=yes 
+       recursive=yes
+       rsync_opts="--exclude=.svn"
+...

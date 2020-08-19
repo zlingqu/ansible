@@ -1,0 +1,15 @@
+- name: install epel-release
+  yum:
+    name: "{{ item }}"
+    state: installed
+  async: 300
+  ignore_errors: yes
+  with_items:
+  - epel-release
+  - supervisor
+
+- name:  supervisor auto start
+  service:
+    name: supervisord
+    state: started
+    enabled: yes

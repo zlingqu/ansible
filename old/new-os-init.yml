@@ -1,0 +1,115 @@
+---
+- hosts: new-os
+  remote_user: root
+  vars:
+    - user_name: lx2
+    - uid: 1234
+    - pkgs:
+      - lrzsz
+      - iftop
+      - unzip
+      - gzip
+      - sysstat
+      - rsync
+      - tree
+      - iotop
+      - telnet
+
+  tasks:
+###########主机信任################
+   - name: 1.1 同步公钥
+     copy: 
+      src: files/authorized_keys
+      dest: /root/.ssh/
+###########主机信任################
+###########创建程序用户################
+   - name: 2.1 创建用户lx2
+     user:
+      name: lx2
+      uid: 1234
+      shell: /bin/bash
+      state: present
+      password: $6$yOwdq.Rdp0CIUARG$SVSuRVJzLG.vW7pnLbQN/nSh7DVp2sAhsfp0HVD48wrAzWQ4T9OcObn6rOS6CuCQCfn9tVZHXLEsfuQ7YfprB0
+      update_password: on_create
+   - name: 2.2 锁定用户，使其不能通过密码登陆服务器
+     user: 
+       name: lx2   
+       password_lock: TRUE
+###########创建程序用户################
+###########同步zabbix-agent包################
+   - name: 3.1 同步 zabbix-agent 安装包 for apt
+     copy: 
+      src: files/zabbix-agent_4.0.0_{{ansible_distribution_release}}_amd64.deb
+      dest: /root
+     when: ansible_pkg_mgr == "apt"
+   - name: 3.1 同步 zabbix-agent 安装包 for yum
+     copy: 
+      src: files/zabbix-agent-4.0.0-el{{ ansible_distribution_major_version }}.x86_64.rpm
+      dest: /root
+     when: ansible_pkg_mgr == "yum"
+###########同步zabbix-agent包################
+###########安装zabbix-agent包及一些必要的包################
+   - name: 4.1 安装 zabbix-agent for apt
+     apt:
+      deb: /root/zabbix-agent_4.0.0_{{ansible_distribution_release}}_amd64.deb 
+     when: ansible_pkg_mgr == "apt"
+   - name: 4.2 安装一些必要的包 for apt
+     apt:
+       name: "{{ pkgs }}" 
+     when: ansible_pkg_mgr == "apt"
+   - name: 4.1 安装 zabbix-agent  for yum
+     yum:
+       name: /root/zabbix-agent-4.0.0-el{{ ansible_distribution_major_version }}.x86_64.rpm
+     when: ansible_pkg_mgr == "yum"
+   - name: 4.2 安装一些必要的包 for yum
+     yum:
+       name: "{{ pkgs }}"
+     when: ansible_pkg_mgr == "yum"
+###########安装zabbix-agent包及一些必要的包################
+
+###########配置java环境################
+   - name: 5.1 同步 oracle-jdk
+     synchronize:
+      src: files/jdk1.8.0_171
+      dest: /usr/local
+   - name: 5.2 创建软连接
+     file:
+       path: /usr/local/jdk
+       state: link
+       src: /usr/local/jdk1.8.0_171 
+   - name: 5.3 添加环境变量
+     lineinfile :
+       path: /etc/profile
+       line: 
+         JAVA_HOME=/usr/local/jdk
+         export PATH=$JAVA_HOME/bin:$PATH
+###########配置java环境################
+###########创建目录################
+   - name: 6.1 创建必要的目录
+     file:
+       path: "{{ item }}"
+       state: directory
+       owner: lx2
+       group: lx2 
+       mode: 0755
+     with_items:
+        - /data
+        - /rebuild
+
+###########创建目录################
+###########同步zabbix-agent配置文件并触发构建##############
+   - name: 7.1 同步zabbix-agent配置文件
+     synchronize: 
+      src: files/zabbix_conf/
+      dest: /etc/zabbix
+     notify: 8.1 重启 zabbix-agent
+###########同步zabbix-agent配置文件###############
+  handlers:
+###########重启 zabbi-agent by条件触发################
+   - name: 8.1 重启 zabbix-agent
+     service:
+      name: zabbix-agent
+      state: restarted
+      enabled: yes
+###########重启 zabbi-agent by条件触发################
+...

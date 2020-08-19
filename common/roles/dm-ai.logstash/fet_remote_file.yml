@@ -1,0 +1,17 @@
+- hosts: docker-php-online-logstash
+  gather_facts: false
+  become: yes
+  become_method: sudo
+  tasks:
+    - name: get remote file
+      fetch:
+        src: /data/logstash/logstash-6.2.4/config/logstash.conf
+        dest: templates/logstash.docker-php-online-log.conf
+        flat: yes
+      register: motd_contents
+
+    - name: show debug
+      debug:
+        var: motd_contents
+        verbosity: 0
+

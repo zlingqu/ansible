@@ -1,0 +1,32 @@
+- name: 生成 Docker GPG 公钥
+  copy:
+    src: docker.gpg
+    dest: /tmp/docker.gpg
+    owner: root
+    mode: 0644
+
+- name: 添加 Docker GPG 公钥
+  shell: apt-key add /tmp/docker.gpg
+
+- name: 添加 Docker apt 仓库
+  apt_repository:
+    repo: "{{ docker_apt_repo }}"
+    state: present
+
+- name: 安装 Docker
+  apt: 
+    name:
+    - "docker-ce={{ docker_version }}~ce~3-0~{{ ansible_distribution | lower }}"
+    state: present
+    allow_unauthenticated: true
+  when: docker_version is version('18.09', '<')
+
+- name: 安装 Docker
+  apt: 
+    name:
+    - "docker-ce=5:{{ docker_version }}~3-0~{{ ansible_distribution | lower }}-{{ ansible_distribution_release }}"
+    - "docker-ce-cli=5:{{ docker_version }}~3-0~{{ ansible_distribution | lower }}-{{ ansible_distribution_release }}"
+    - "containerd.io"
+    state: present
+    allow_unauthenticated: true
+  when: docker_version is version('18.09', '>=')

@@ -1,0 +1,19 @@
+- name: install zookeeper
+  include: install.yml
+  tags:
+    - build
+
+- name: config zookeeper
+  include: config.yml
+  tags:
+    - config
+
+- name: restart zookeeper
+  shell: source /etc/profile && bin/zkServer.sh restart
+  args:
+    chdir: "{{ app_dir }}"
+
+- wait_for: port={{ zk_port }} state=started timeout=20
+
+- name: zk autostart
+  include: autostart.yml

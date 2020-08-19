@@ -1,0 +1,4 @@
+- hosts: mysql8
+  gather_facts: no
+  roles:
+  - mysql8

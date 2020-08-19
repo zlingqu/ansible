@@ -1,0 +1,4 @@
+- hosts: mysql-prd
+  gather_facts: yes
+  roles:
+  - alone 

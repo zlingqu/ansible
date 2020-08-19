@@ -1,0 +1,6 @@
+- include: prom-update.yml
+  when: update_type == 'prom'
+- include: regsecret-update.yml
+  when: update_type == 'regsecret'
+- include: log-pilot.yml
+  when: update_type == 'log-pilot'

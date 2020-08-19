@@ -1,0 +1,4 @@
+- hosts: mysql-master-slave
+  gather_facts: yes
+  roles:
+  - master_slave

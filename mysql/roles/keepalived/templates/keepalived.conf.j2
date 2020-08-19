@@ -1,0 +1,23 @@
+! Configuration File for keepalived
+
+global_defs {
+  router_id LVS_DEVEL
+}
+
+{% for instance in vrrp_instances %} #支持多个instance,通常只需要一个
+vrrp_instance {{ instance.name }} {
+  state {% if inventory_hostname == ansible_play_batch[0] %} MASTER {% else %} BACKUP {% endif %} 
+
+  interface {{ instance.interface }}
+  virtual_router_id {{ instance.vip.split(".")[3] }}
+  advert_int 1
+  priority {% for ip in ansible_play_batch %} {% if inventory_hostname == ip %} {{ 100 - loop.index }} {% endif %} {% endfor %} 
+  authentication {
+    auth_type PASS
+    auth_pass {{ instance.auth_pass }}
+  }
+  virtual_ipaddress {
+      {{ instance.vip }} dev {{ instance.interface }} label {{ instance.interface }}:{{ loop.index -1}}
+  }
+}
+{% endfor %}

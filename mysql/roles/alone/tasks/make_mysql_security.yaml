@@ -1,0 +1,15 @@
+  - name: transfer sql statement to remonte
+    template:
+     src: secure.sql.j2
+     dest: /tmp/make_mysql_secure.sql
+    when: mtls_make_mysql_secure == 1
+
+  - name: make mysql secure
+    shell: mysql -hlocalhost -uroot -P{{ mysql_port }} < /tmp/make_mysql_secure.sql
+    when: mtls_make_mysql_secure == 1
+    ignore_errors: yes
+
+  - name: remove temp file /tmp/make_mysql_secure.sql
+    file:
+     dest: /tmp/make_mysql_secure.sql
+     state: absent

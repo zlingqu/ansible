@@ -1,0 +1,14 @@
+- name: 分发cm的rpm包
+  copy:
+    src: "{{cdh_cache_dir}}/"
+    dest: /opt/cloudera/parcel-repo/
+    owner: cloudera-scm
+    group: cloudera-scm
+- name: 重启 cloudera-scm-server 服务，并设置自启动
+  systemd:
+    name: cloudera-scm-server
+    daemon_reload: yes
+    state: restarted
+    enabled: yes
+  tags:
+    restarted

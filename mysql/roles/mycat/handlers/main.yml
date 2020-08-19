@@ -1,0 +1,6 @@
+- name: 重新加载 mycat
+  # shell: echo "reload @@config_all;" |mysql -h 127.0.0.1 -P9066 -uadmin -pc91810ab0699982d1e
+  shell: echo "reload @@config_all;" |mysql -h 127.0.0.1 -P9066 -udm_base -p0c3c846e62528dfac86f
+  #shell: echo "请手动加载"
+  #shell: /usr/local/mycat/bin/mycat restart
+  ignore_errors: yes

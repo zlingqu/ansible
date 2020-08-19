@@ -1,0 +1,37 @@
+- name: copy repo
+  copy:
+    src: logstash-7.repo
+    dest: /etc/yum.repos.d/
+
+- name: install
+  yum: 
+    name: logstash-{{ version }}
+
+
+
+- name: 获取内存大小，用于设置jvm
+  setup:
+    filter: ansible_memtotal_mb
+
+- name: debug
+  debug: 
+    msg: "{{ ansible_memtotal_mb * 0.75 // 1000 | int }},{{ [ ((ansible_memtotal_mb * 0.75 // 1024) | int ) , 1 ] | max }}"
+
+
+- name: 提供配置文件
+  template: 
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+  with_items:
+  - {src: "jvm.options.j2", dest: "/etc/logstash/jvm.options"}  
+  - {src: "kafka.conf.j2", dest: "/etc/logstash/conf.d/kafka.conf"}  
+  notify:
+    - restart logstash
+
+- name: 开机自启
+  service:
+    name: "{{ item.name }}"
+    state: "{{ item.state }}"
+    enabled: "{{ item.enabled }}"
+  with_items:
+    - { name: 'logstash', state: 'started', enabled: 'true' }

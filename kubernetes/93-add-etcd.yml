@@ -1,0 +1,32 @@
+- hosts: new-etcd[0]
+  tasks:
+  - name: 校验 new-etcd 节点组数量
+    assert:
+      that: groups['new-etcd']|length <= 1
+      msg: "同时只能添加一个 etcd 节点。"
+
+- hosts: 
+  - all
+  roles:
+  - prepare/base
+  - prepare/docker
+  - prepare/kubernetes
+
+- hosts: 
+  - etcd
+  - new-etcd
+  roles:
+  - etcd/certificates
+  - etcd/install
+
+# 添加etcd节点后刷新master节点kubeadm配置
+- hosts: 
+  - kube-master
+  roles:
+  - kube-master/install
+
+# 标记各节点角色
+- hosts: 
+  - new-etcd
+  roles:
+  - post

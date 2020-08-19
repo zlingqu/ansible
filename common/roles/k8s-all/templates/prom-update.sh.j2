@@ -1,0 +1,15 @@
+#/bin/bash
+cd /tmp
+
+source ~/.bash_profile
+
+kubectl apply -f https://gitlab.dm-ai.cn/application-engineering/devops/deployment/raw/dev/devops/all/prometheus/deploy.yml?private_token=zXswJbwzgd3Smarcd4pD
+kubectl apply -f https://gitlab.dm-ai.cn/application-engineering/devops/deployment/raw/dev/devops/all/prometheus/rules.yml?private_token=zXswJbwzgd3Smarcd4pD
+
+wget -O config.yml https://gitlab.dm-ai.cn/application-engineering/devops/deployment/raw/dev/devops/all/prometheus/config.yml?private_token=zXswJbwzgd3Smarcd4pD
+
+
+sed -i 's/K8SENV/{{ k8s_env }}/g' config.yml
+
+kubectl apply -f config.yml
+

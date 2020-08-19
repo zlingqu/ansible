@@ -1,0 +1,86 @@
+mtls_mycat: Mycat-server-1.6.5-release-20180122220033-linux.tar.gz
+schemas:
+- db: apollo_configdb_dev
+  user: apollo
+- db: apollo_configdb_test
+  user: apollo
+- db: apollo_configdb_uat
+  user: apollo
+- db: apollo_configdb_stage
+  user: apollo
+- db: apollo_configdb_prd
+  user: apollo
+- db: apollo_portaldb
+  user: apollo
+- db: dm_mip
+  user: dm_mip
+- db: dm_cdh6_scm
+  user: dm_cdh6
+- db: dm_cdh6_hive
+  user: dm_cdh6
+- db: dm_cdh6_hue
+  user: dm_cdh6
+- db: dm_cdh6_oozie
+  user: dm_cdh6
+- db: dm_cdh6_report_manager
+  user: dm_cdh6
+- db: dm_base
+  user: dm_base
+- db: dm_milvus
+  user: dm_milvus
+- db: dm_aixh
+  user: dm_aixh
+
+users:
+- user: apollo
+  passwd: b945a8b5908793b6e
+  dbs:
+  - apollo_configdb_dev
+  - apollo_configdb_test
+  - apollo_configdb_uat
+  - apollo_configdb_stage
+  - apollo_configdb_prd
+  - apollo_portaldb
+  readonly: "false"
+- user: dm_mip
+  passwd: pd8X026SLE6fxa
+  dbs:
+  - dm_mip
+  readonly: "false"
+- user: dm_mip_read
+  passwd: Lu8X99tLy3
+  dbs:
+  - dm_mip
+  readonly: "true"
+- user: dm_cdh6
+  passwd: 1a0e613d6b1bea041
+  dbs:
+  - dm_cdh6_scm
+  - dm_cdh6_hive
+  - dm_cdh6_hue
+  - dm_cdh6_oozie
+  - dm_cdh6_report_manager
+  readonly: "false"
+- user: dm_base
+  passwd: 0c3c846e62528dfac86f
+  dbs:
+  - dm_base
+  readonly: "false"
+- user: dm_base_read
+  passwd: 982d1ed16161ab8
+  dbs:
+  - dm_base
+  readonly: "true"
+
+- user: dm_milvus
+  passwd: P0026dS71c4b92W
+  dbs:
+  - dm_milvus
+  readonly: "false"
+
+
+- user: dm_aixh
+  passwd: 0cab9af7f9c7c2133f0fedca8
+  dbs:
+  - dm_aixh
+  readonly: "false"

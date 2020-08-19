@@ -1,0 +1,105 @@
+- name: 安装包
+  apt:
+    update_cache: yes
+    cache_valid_time: 30
+    name: "{{ item }}"
+  with_items:
+  - python-apt
+  - curl
+  - vim
+  - sysv-rc-conf
+  when:
+  - ansible_distribution == "Ubuntu"
+
+
+- name: 创建必要的目录
+  file:
+    path: "{{ item.path }}"
+    state: "{{ item.type }}"
+    access_time: "preserve"
+  with_items:
+     - { type: 'directory', path: '/data'}
+     - { type: 'directory', path: '~/.ssh'}
+     - { type: 'directory', path: '~/.docker'}
+     - { type: 'touch', path: '~/.ssh/authorized_keys'}
+  tags:
+    - file
+
+- name: copy脚本
+  copy:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+  with_items:
+     - { src: 'install_docker.sh', dest: '/tmp'}
+     - { src: 'data/', dest: '/data/'}
+     - { src: 'docker/config.json', dest: '~/.docker'}
+  tags:
+    - file
+
+- name: 安装docker
+  shell: "bash /tmp/install_docker.sh"
+  when:
+  - ansible_distribution == "Ubuntu"
+
+
+- name: 添加docker-aliyun的yum仓库
+  yum_repository:
+    file: docker-ce #文件名，默认和name一样
+    name: docker-ce-stable
+    description: Aliyun Docker CE Stable - $basearch
+    baseurl: https://mirrors.aliyun.com/docker-ce/linux/centos/7/$basearch/stable
+    enabled: yes
+    gpgcheck: no
+    gpgkey: https://mirrors.aliyun.com/docker-ce/linux/centos/gpgkage-key.gpg
+    state: present
+  when:
+  - ansible_distribution == "CentOS"
+
+- name: 安装docker
+  yum: 
+    name: docker-ce
+  when:
+  - ansible_distribution == "CentOS"
+
+
+- name: 相关服务管理
+  service:
+    name: "{{ item.name }}"
+    state: "{{ item.state }}"
+    enabled: "{{ item.enabled }}"
+  with_items:
+    - { name: 'docker', state: 'started', enabled: 'true' }
+
+
+#- name: 安装docker-compose
+#  shell: curl -L "https://github.com/docker/compose/releases/download/1.25.4/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+
+- name: 安装docker-compose
+  get_url:
+    url: https://github.com/docker/compose/releases/download/1.25.4/docker-compose-$(uname -s)-$(uname -m)
+    dest: /usr/local/bin/docker-compose
+    mode: 0755
+
+
+- name: 修改docker-compose权限
+  file:
+    name: /usr/local/bin/docker-compose
+    mode: 0744
+
+
+- name: 开机自动启动容器
+  lineinfile: 
+    path: /etc/rc.local
+    line: "cd /data/ && docker-compose up -d"
+
+- name: rc.local添加x权限
+  file:
+    path: /etc/rc.d/rc.local
+    mode: +x
+
+- name: 主机信任
+  lineinfile :
+    path: /root/.ssh/authorized_keys
+    line: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDS/n7Cjgv8Je1AWRyOctT3N/6iSQa6cyVrjQQY+sPsCjtXMLQvA9TKJwVIkRC1Dr2rQ1/hAINmkxtnh4lFN1pMmKH4CXo3hsPt6o7VnrRqFyQx28Cnewz9vML6Tr+9Kw5k3XO2XB9CV3Lq05vG0Jt8q+tjsDxnsKOcZheLKXUeIRLwuoEGz6oZVYc/iTeyWGpqoa1dIw+Sx5KhUjsWKPqtJbzl7c2AlYXCbkND63FW0MBAT7G+0lkzpA0l+/tYrOWGBIWxYdl2seiGs1UuPVG9u+F1JV71B4XB6ua0ZSjbGcc5IM7wmPYsTPu/Q/i9EU/0VI9/qkq7nJqipJPXi1Tl jenkins@dm-ai.cn"
+  tags:
+  - file

@@ -1,0 +1,27 @@
+- name: 同步配置文件
+  template:
+    src: "{{ item.src }}"
+    dest: "{{ item.path }}"
+  backup: yes
+  with_items:
+    - { src: "logstash.{{ project_name }}-log.conf", path: /data/logstash/logstash-7.3.2/config }
+    - { src: "supervisor.{{ project_name }}-log.ini", path: /etc/supervisord.d }
+    - { src: logstash.yml, path: /data/logstash/logstash-7.3.2/config }
+    - { src: jvm.options, path: /data/logstash/logstash-7.3.2/config }
+  notify:
+    - restart logstash
+
+#- name: 设置安全认证文件
+#  copy:
+#    src: truststore.jks
+#    dest: /data/logstash/logstash-7.3.2/truststore.jks
+#    mode: 0755
+#  notify:
+#    - restart logstash
+
+- name: start logstash for supervisor
+  shell: "supervisorctl update; supervisorctl restart {{ project_name }}-logstash:{{ project_name }}-logstash-0"
+  args:
+    chdir: "{{ logstash.install_path }}/{{ logstash.tar_dir_name }}"
+  tags:
+    - tmp

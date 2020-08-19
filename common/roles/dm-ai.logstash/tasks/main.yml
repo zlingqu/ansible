@@ -1,0 +1,5 @@
+- name: install logstash
+  include: install.yml
+
+- name: configure logstash
+  include: configure.yml

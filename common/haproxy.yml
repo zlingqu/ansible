@@ -1,0 +1,33 @@
+- hosts: haproxy-dev
+#- hosts: haproxy-test
+  gather_facts: no
+  roles:
+  - role: haproxy
+  vars:
+   tcp_listen: 
+   - name: http
+     port: 80
+     mode: http
+   - name: https
+     port: 443
+     mode: http
+   tcp_backend_servers:
+   - listen_name: http
+     node_name: s1
+     address: 192.168.3.22:31380
+   - listen_name: http
+     node_name: s2
+     address: 192.168.3.23:31380
+   - listen_name: http
+     node_name: s3
+     address: 192.168.3.24:31380
+   - listen_name: https
+     node_name: s1
+     address: 192.168.3.22:31390
+     maxconn: 300
+   - listen_name: https
+     node_name: s2
+     address: 192.168.3.23:31390
+   - listen_name: https
+     node_name: s3
+     address: 192.168.3.24:31390

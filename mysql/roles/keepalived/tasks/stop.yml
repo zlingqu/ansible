@@ -1,0 +1,6 @@
+- name: 卸载 keepalived
+  yum:
+    name: "{{ item }}"
+    state: absent
+  with_items:
+    - keepalived

@@ -1,0 +1,5 @@
+- name: restart node-exporter
+  become: yes
+  shell: supervisorctl update; supervisorctl restart {{ project_name }}:{{ project_name }}-0
+  args:
+    chdir: "/tmp"

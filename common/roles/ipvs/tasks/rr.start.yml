@@ -1,0 +1,19 @@
+- name: 传递脚本
+  template:
+    src: ipvs_rs.sh.j2
+    dest: /bin/ipvs_rs.sh
+    mode: 755
+
+- name: 执行脚本,修改rr相关内核参数
+  shell: "/bin/ipvs_rs.sh start"
+
+- name: 开机启动
+  lineinfile:
+    path: /etc/rc.local
+    line: "/bin/ipvs_rs.sh start"
+
+- name: rc.local添加x权限
+  file:
+    path: /etc/rc.d/rc.local
+    mode: +x
+

@@ -1,0 +1,10 @@
+---
+- hosts: "{{ group }}"
+  gather_facts: no
+  roles: 
+  - etcd
+  vars:
+    ssl_dir: /etc/etcd/ssl
+    CA_EXPIRY: 876000h #单位不能用d,876000h = 365 * 24 * 100,即100年
+    CERT_EXPIRY: 438000h #50年
+###使用方法 ansible-playbook etcd.yml -e group=

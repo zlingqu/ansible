@@ -1,0 +1,7 @@
+#- hosts: media-gateway
+- hosts: aliyun
+  gather_facts: yes
+  sudo: yes
+  sudo_user: root
+  roles:
+  - role: media-gateway

@@ -1,0 +1,15 @@
+# 提权操作
+ansible_become: true
+
+# 是否等待启动
+wait_plugins_ready: true
+
+# 是否启用kubernetes-dashboard 
+kubernetesui_dashboard_enabled: true
+
+# dashboard默认证书有效期
+kubernetesui_dashboard_certs_expired: 36500
+
+# kubernetes-dashboard 镜像地址
+kubernetesui_dashboard_image: dockerhub.azk8s.cn/kubernetesui/dashboard:v2.0.0-beta4
+kubernetesui_metrics_scraper_image: dockerhub.azk8s.cn/kubernetesui/metrics-scraper:v1.0.1

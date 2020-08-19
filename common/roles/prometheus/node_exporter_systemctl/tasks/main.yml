@@ -1,0 +1,23 @@
+- name: copy node_exporter file
+  copy:
+    src: node_exporter_1.0.1
+    dest: /usr/bin/{{ bin_name }}
+    mode: 0755
+
+- name: copy node_exporter.sevice file
+  template:
+    src: "{{ item.src }}"
+    dest: "{{ item.path }}"
+  with_items:
+      - { src: "node_exporter.service.j2", path: "/usr/lib/systemd/system/node_exporter.service" }
+
+- name: update node-exporter
+  systemd:
+    name: node_exporter
+    enabled: yes 
+    daemon_reload: yes
+    state: started
+
+- name: check node exporter port
+  wait_for: port={{ D_port }} delay=5
+  async: 60

@@ -1,0 +1,12 @@
+---
+- name: start logstash
+  become: yes
+  shell: "supervisorctl update; supervisorctl start {{ project_name }}-logstash:{{ project_name }}-logstash-0"
+  args:
+    chdir: "{{ logstash.install_path }}/{{ logstash.tar_dir_name }}"
+
+- name: restart logstash
+  become: yes
+  shell: "supervisorctl update; supervisorctl restart {{ project_name }}-logstash:{{ project_name }}-logstash-0"
+  args:
+    chdir: "{{ logstash.install_path }}/{{ logstash.tar_dir_name }}"

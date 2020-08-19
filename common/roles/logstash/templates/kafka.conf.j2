@@ -1,0 +1,65 @@
+input {
+     kafka {
+        bootstrap_servers => ["k8s.log.kafka1:9092,k8s.log.kafka2:9093,k8s.log.kafka3:9094"]
+        max_poll_records => "30000"
+        session_timeout_ms => "20000"
+        client_id => "k8s-1"
+        group_id => "k8s-1"
+        codec => 'json'
+        auto_offset_reset => "earliest"
+        consumer_threads =>30
+        decorate_events => true
+        topics => ["k8s-log"]
+       }
+
+    kafka {
+        bootstrap_servers => ["192.168.3.30:9092,192.168.3.31:9092,192.168.3.32:9092"]
+        max_poll_records => "25000"
+        session_timeout_ms => "20000"
+        client_id => "k8s-1"
+        group_id => "k8s-1"
+        codec => 'json'
+        auto_offset_reset => "earliest"
+        consumer_threads =>18
+        decorate_events => true
+        topics => ["k8s-jenkins","k8s-log"]
+    }
+}
+
+filter {
+    if ![k8senv] {
+        mutate {
+                add_field => {
+                        k8senv => "k8s-jenkins"
+                  }
+        }
+    }
+        if [kubernetes][container_name] == "traefik-v2" {
+        mutate {
+                add_field => {
+                        "message" => "%{[msg]}"
+                  }
+                 remove_field => ["msg"]
+        }
+
+    }
+
+    if [msg]  {
+        json {
+            source => "msg"
+#            target => "message_json"
+#            remove_field=>["msg"]
+            skip_on_invalid_json => false
+        }
+}
+
+}
+
+output {
+    elasticsearch {
+        hosts => ["192.168.69.40:9200","192.168.69.41:9200"]
+        index => "%{k8senv}-%{+yyyy.MM.dd}"
+        document_type => "_doc"
+        template_overwrite => true
+    }
+}

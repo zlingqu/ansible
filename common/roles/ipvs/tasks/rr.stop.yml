@@ -1,0 +1,13 @@
+- name: 停止ipvs
+  shell: "/bin/ipvs_rs.sh stop"
+
+- name: 删除开机启动
+  lineinfile:
+    path: /etc/rc.local
+    line: "/bin/ipvs_rs.sh start"
+    state: absent
+
+- name: 删除ipvs_rs.sh
+  file:
+    path: /bin/ipvs_rs.sh
+    state: absent

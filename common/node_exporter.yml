@@ -1,0 +1,10 @@
+- hosts: "{{ group }}" 
+  gather_facts: no
+  vars:
+  - bin_name: "dmai_node_exporter"
+    project_name: "node-exporter"
+    D_port: 59100
+  roles:
+  #- role: prometheus/node_exporter
+  - role: prometheus/node_exporter_systemctl
+## ansible-playbook node_exporter.yml -e group=

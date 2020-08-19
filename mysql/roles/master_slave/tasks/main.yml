@@ -1,0 +1,13 @@
+- name: stransfer sql to remote host
+  template: 
+    src: master_slaves.sql.j2
+    dest: /tmp/master_slaves.sql
+
+- name: create replication user on master / start slave on slave
+  when:
+  shell: mysql -hlocalhost -uroot -p{{ mysql_root_password }} -P{{ mysql_port }} < /tmp/master_slaves.sql
+
+- name: clear temp file tmp/master_slaves.sql
+  file:
+    dest: tmp/master_slaves.sql
+    state: absent

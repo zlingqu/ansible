@@ -1,0 +1,21 @@
+mtls_mycat: Mycat-server-1.6.5-release-20180122220033-linux.tar.gz
+schemas:
+- db: dm_gbs
+  user: dm_gbs
+
+users:
+- user: dm_gbs
+  passwd: c38fc48e3c61db
+  dbs:
+  - dm_gbs
+  readonly: "false"
+- user: dm_gbs_read
+  passwd: xtnh4lFN1pMmKH
+  dbs:
+  - dm_gbs
+  readonly: "true"
+- user: quzl
+  passwd: 123456
+  dbs:
+  - dm_gbs
+  readonly: "false"

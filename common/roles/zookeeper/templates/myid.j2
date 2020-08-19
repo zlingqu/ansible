@@ -1,0 +1,5 @@
+{% for ip in ansible_play_batch %}
+{% if inventory_hostname == ip %}
+{{ loop.index }}
+{% endif %}
+{% endfor %}

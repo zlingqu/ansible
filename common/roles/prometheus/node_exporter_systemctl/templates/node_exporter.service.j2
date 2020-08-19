@@ -1,0 +1,11 @@
+[Service]
+User=root
+Group=root
+ExecStart=/usr/bin/dmai_node_exporter --web.listen-address=:{{D_port}}
+
+[Install]
+WantedBy=multi-user.target
+
+[Unit]
+Description=node_exporter
+After=network.target

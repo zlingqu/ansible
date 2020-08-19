@@ -1,0 +1,11 @@
+# 服务器使用 swap 内存的百分比
+vm_swappiness: 10
+
+# SSH 用户
+ssh_user: "root"
+#
+#  SSH 用户组
+ssh_group: "root"
+#
+#  SSH 用户默认路径
+ssh_user_path: "/root"

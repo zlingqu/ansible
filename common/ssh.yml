@@ -1,0 +1,7 @@
+- hosts: ssh 
+  gather_facts: no
+  vars:
+    delete_or_add: present 
+#    delete_or_add: absent 
+  roles:
+  - role: ssh

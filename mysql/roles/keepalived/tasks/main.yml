@@ -1,0 +1,7 @@
+- name: 配置和启动keepalived
+  include: start.yml
+  when: action == 'start'
+
+- name: 删除keepalived
+  include: stop.yml
+  when: action == 'stop'

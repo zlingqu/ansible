@@ -1,0 +1,12 @@
+rs.initiate(
+  {
+    _id : "{{ replset_name }}",
+    members: [
+    {% for host in ansible_play_batch %}
+      { _id : {{loop.index}}, host: "{{host}}:{{PORT}}" },
+    {% endfor %}
+    ]
+  }
+)
+
+printjson(rs.status());

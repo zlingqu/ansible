@@ -1,0 +1,43 @@
+#- name: 证书相关
+#  include: cert.yml
+
+
+- name: 下载etcd并解压二进制文件
+  unarchive:
+    src: https://github.com/etcd-io/etcd/releases/download/{{ETCD_VER}}/etcd-{{ETCD_VER}}-linux-amd64.tar.gz
+    dest: /usr/local
+    remote_src: yes
+- name: 拷贝etcd、etcdctl到/bin目录
+  copy:
+    src: "{{item}}"
+    dest: /bin
+    remote_src: yes
+    mode: 0755
+  with_items:
+  - /usr/local/etcd-{{ETCD_VER}}-linux-amd64/etcd
+  - /usr/local/etcd-{{ETCD_VER}}-linux-amd64/etcdctl
+
+- name: 创建etcd的systemd unit文件
+  template: 
+    src: etcd.service.j2 
+    dest: /etc/systemd/system/etcd.service
+  tags: upgrade_etcd
+
+
+- name: 重新加载 daemon
+  systemd:
+    daemon_reload: yes
+
+
+- name: 保证目录有效
+  file:
+    path: /var/lib/etcd
+    state: directory
+
+- name: 相关服务管理
+  service:
+    name: "{{ item.name }}"
+    state: "{{ item.state }}"
+    enabled: "{{ item.enabled }}"
+  with_items:
+    - { name: 'etcd', state: 'started', enabled: 'true' }

@@ -1,0 +1,41 @@
+- name: install node_exporter
+  copy:
+    src: node_exporter_1.0.1
+    dest: /usr/bin/{{ bin_name }}
+    mode: 0755
+
+- name: create log directory if it doesn't exist
+  file:
+    path: /data/logs/supervisor
+    state: directory
+    mode: 0755
+
+- name: copy supervisor config file
+  template:
+    src: "{{ item.src }}"
+    dest: "{{ item.path }}"
+  with_items:
+      - { src: "supervisor.{{ project_name }}.ini", path: "/etc/supervisord.d/" }
+  notify:
+    - restart node-exporter
+
+- name: update node-exporter
+  become: yes
+  shell: "supervisorctl update"
+  args:
+    chdir: "/tmp"
+
+- name: check node exporter port
+  wait_for: port={{ D_port }} delay=5
+  async: 60
+
+
+#- name: copy register consul
+#  template:
+#    src: "resister-consul.sh"
+#    dest: "/tmp/resister-consul.sh"
+#  tags:  exec_shell
+
+#- name: exec register consul
+#  shell: "cd /tmp; chmod a+x resister-consul.sh; bash /tmp/resister-consul.sh; rm -fr /tmp/resister-consul.sh"
+#  tags:  exec_shell

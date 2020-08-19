@@ -1,0 +1,46 @@
+# 提权操作
+ansible_become: true
+
+# 是否等待启动
+wait_plugins_ready: true
+
+# 是否启用ingress-controller
+ingress_controller_enabled: true
+
+# ingress-controller类型(nginx,traefik)
+ingress_controller_tpye: traefik
+
+# NodePort svc 监听http协议端口(注意需在NodePort端口范围)
+ingress_controller_http_nodeport: 30080
+# NodePort svc 监听https协议端口(注意需在NodePort端口范围)
+ingress_controller_https_nodeport: 30443
+
+# nginx-ingress-controller 镜像地址
+nginx_ingress_image: quay.azk8s.cn/kubernetes-ingress-controller/nginx-ingress-controller:0.26.1
+
+# traefik默认证书过期时间（天）
+traefik_certs_expired: 3650
+# traefik-ingress-controller 镜像地址
+traefik_ingress_image: dockerhub.azk8s.cn/library/traefik:1.7.14
+
+# 默认使用kube-proxy的 'iptables' 模式，可选 'ipvs' 模式(experimental)
+kube_proxy_mode: "iptables"
+
+INGRESS_EXTERNALIPS: |
+  {% for host in ((groups['kube-worker'] + groups['new-worker'])|unique) %}
+  {% if hostvars[host]['ansible_host'] is defined %}
+    - {{ hostvars[host]['ansible_host'] }}
+  {% else %}
+    - {{ host }}
+  {% endif %}
+  {% endfor %}
+
+INGRESS_MIN_REPLICAS: >-
+  {%- if (groups['kube-worker'] + groups['new-worker']) | unique | length > 1 -%}
+  2
+  {%- else -%}
+  1
+  {%- endif -%}
+
+INGRESS_MAX_REPLICAS: >-
+  {{ (groups['kube-master'] + groups['kube-worker'] + groups['new-master'] + groups['new-worker']) | unique | length }}

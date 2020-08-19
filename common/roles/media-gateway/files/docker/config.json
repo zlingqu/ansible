@@ -1,0 +1,10 @@
+{
+        "auths": {
+                "rdac-docker.dm-ai.cn": {
+                        "auth": "Y2hvbmd3ZW46MGM0NTU1YjRiMGE5QQ=="
+                }
+        },
+        "HttpHeaders": {
+                "User-Agent": "Docker-Client/19.03.1 (linux)"
+        }
+}

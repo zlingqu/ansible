@@ -1,0 +1,13 @@
+- name: 提供myid文件
+  template:
+    src: myid.j2
+    dest: "{{ data_dir }}/myid"
+  tags:
+    - files
+
+- name: 提供zk配置文件
+  template:
+    src: zoo.cfg.j2
+    dest: "{{ app_dir }}/conf/zoo.cfg"
+  tags:
+    - files

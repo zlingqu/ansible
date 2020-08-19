@@ -1,0 +1,13 @@
+[Unit]
+Description=dcgm-exporter service
+
+[Service]
+User=root
+ExecStart=/usr/bin/dcgm-exporter --address=:59400
+
+TimeoutStopSec=10
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,8 @@
+- hosts: cephfs
+  gather_facts: no
+  become: yes
+  vars:
+    ns: milvus
+    size: 100Gi
+  roles:
+  - role: cephfs
