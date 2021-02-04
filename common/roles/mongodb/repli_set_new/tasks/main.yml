@@ -1,0 +1,16 @@
+---
+- name: 配置需要的资源
+  include: configure.yml
+  tags: [mongodb]
+
+- name: 初始化认证
+  include: auth_initialization.yml
+  tags: [mongodb]
+
+- name: 初始化副本集
+  include: init_replicaset.yml
+  when: ( MONGO_MASTER is defined and MONGO_MASTER )
+  tags: [mongodb]
+
+- name: 启动 mongo
+  shell: systemctl daemon-reload && systemctl enable mongod.service && systemctl restart mongod.service

@@ -1,0 +1,10 @@
+---
+- name: copy iptables.sh
+  template:
+    src: iptables.j2
+    dest: "/root/iptables.sh"
+    owner: root
+    group: root
+    mode: '0700'
+  notify:
+    - reload iptables

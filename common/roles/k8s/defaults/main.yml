@@ -1,0 +1,13 @@
+pkgs:
+  - docker-ce-18.06.3.ce
+#  - kubernetes-cni-0.7.5-0
+  - kubelet-1.18.10
+  - kubectl-1.18.10
+  - kubeadm-1.18.10
+#  - docker-ce-19.03.8-3.el7
+#  - kubelet-1.17.7
+#  - kubectl-1.17.7
+#  - kubeadm-1.17.7
+#  - docker-ce-19.03.8-3.el7
+
+#  - docker-ce-19.03.8-3.el7

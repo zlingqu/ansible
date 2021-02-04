@@ -4,4 +4,4 @@ etcd_nodes: "{{ etcd_tmp_nodes.rstrip(',') }}"
 
 cluster_staus: "new"
 
-ETCD_VER: v3.4.3
+ETCD_VER: v3.4.13

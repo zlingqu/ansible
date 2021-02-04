@@ -1,9 +1,11 @@
-- hosts: local
+- hosts: localhost
   gather_facts: no
-  tasks:
-  - name: setup
-    setup:
-      filter: ansible_memtotal_mb
-  - name: debug
-    debug:
-      msg: "var =  {{ ansible_memtotal_mb }}"
+  vars: 
+    - lists: 
+        quzl: 1
+        dev: 2
+    - env: "{{env}}"
+  tasks: 
+    - name: loop
+      debug: msg="{{lists[env]}}"
+      #with_items: '{{lists["{{env}}"]}}'

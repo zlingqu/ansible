@@ -74,3 +74,16 @@
     name: "{{ host }}"
   tags:
     - hostname
+
+- name: 判断是否已经更新过
+  shell: rpm -qa|grep kernel-tools-libs-3.10.0-1127.19.1.el7.x86_64|wc -l
+  register: kernel_if_existis
+  tags: 
+  -  kernel
+
+- name: 升级内核
+  include: kernel.yml
+  tags: 
+  -  kernel
+  when:
+  - kernel_if_existis.stdout != "1"

@@ -1,0 +1,20 @@
+---
+
+- name: reload systemd
+  systemd:
+    daemon_reload: yes
+
+- name: mongodb restart
+  service:
+    name: mongod
+    state: restarted
+
+- name: wait when mongodb is started
+  wait_for:
+    host: "{{ item }}"
+    port: "{{ PORT }}"
+    timeout: 120
+  with_items: localhost
+
+
+

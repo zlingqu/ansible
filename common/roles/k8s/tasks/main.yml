@@ -3,7 +3,6 @@
     path: "{{ item.path }}"
     state: "{{ item.type }}"
   with_items:
-     - { type: 'directory', path: '/etc/docker'}
      - { type: 'directory', path: '/etc/kubernetes/manifests'}
 
 - name: 添加yum仓库
@@ -12,7 +11,7 @@
   - repo
 
 - name: ceph包相关处理
-  include: ceph-13.2.5.yml
+  include: ceph-13.2.8.yml
   when:
   - inventory_hostname in groups['k8s-prd']
   tags:
@@ -25,29 +24,20 @@
   tags:
     - yum
 
-- name: docker配置文件提供
-  template:
-    src: daemon.json.j2
-    dest: "/etc/docker/daemon.json"
-  notify:
-  - 重新加载 daemon
-  # - 重新启动 docker
-  tags:
-    - file
 
-- name: 修改 /etc/hosts 文件
-  blockinfile:
-    path: /etc/hosts
-    block: |-
-      {% for item in ansible_play_batch %}
-      {{ item }} {{ hostvars[item]['host'] }}
-      {% endfor %}
-    state: present
-    create: yes
-    backup: no
-    marker: "# Ansible inventory hosts {mark}"
-  tags:
-    - hosts
+#- name: 修改 /etc/hosts 文件
+#  blockinfile:
+#    path: /etc/hosts
+#    block: |-
+#      {% for item in ansible_play_batch %}
+#      {{ item }} {{ hostvars[item]['host'] }}
+#      {% endfor %}
+#    state: present
+#    create: yes
+#    backup: no
+#    marker: "# Ansible inventory hosts {mark}"
+#  tags:
+#    - hosts
 
 - name: 相关服务管理
   service:
@@ -55,7 +45,6 @@
     state: "{{ item.state }}"
     enabled: "{{ item.enabled }}"
   with_items:
-    - { name: 'docker', state: 'started', enabled: 'true' }
     - { name: 'kubelet', state: 'started', enabled: 'true'}
     - { name: 'postfix', state: 'stopped', enabled: 'false' }
     - { name: 'firewalld', state: 'stopped', enabled: 'false' }
@@ -100,17 +89,8 @@
     - {name: 'vm.min_free_kbytes', value: '{{ (ansible_memtotal_mb // 1024  // 8 + 1 ) * 250 * 1024  }}'}
     - {name: 'net.core.somaxconn', value: '32768'}
     - {name: 'kernel.watchdog_thresh',value: '20'}
+    - {name: 'kernel.softlockup_panic',value: '1'}
   tags: sysctl
-
-- name: 设置定时任务，清理docker image
-  cron:
-    weekday: 0
-    hour: 5
-    minute: 0
-    job: "docker system prune -f"
-    name: delete docker images
-  tags:
-    - cron
 
 
 # 内核模块调整

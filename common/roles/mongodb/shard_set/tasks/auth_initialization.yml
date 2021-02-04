@@ -1,0 +1,82 @@
+- name: 设置authorization
+  set_fact:
+    authorization: false
+
+- name: 配置不需要认证的conf
+  include: authorization.yml
+  tags: [mongodb]
+
+- name: 创建shard1用户
+  mongodb_user:
+    database: admin
+    name: "{{ item.name }}"
+    password: "{{ item.password }}"
+    roles: "{{ item.roles }}"
+    login_port: "{{ item.service_port }}"
+  with_items:
+    - {
+      name: "{{ root_user_name }}",
+      password: "{{ root_user_passwd }}",
+      roles: "root",
+      service_port: "{{ shard1_port }}"
+      }
+  when: shard1 is defined and shard1 == "true"
+
+- name: 创建shard2用户
+  mongodb_user:
+    database: admin
+    name: "{{ item.name }}"
+    password: "{{ item.password }}"
+    roles: "{{ item.roles }}"
+    login_port: "{{ item.service_port }}"
+  with_items:
+    - {
+      name: "{{ root_user_name }}",
+      password: "{{ root_user_passwd }}",
+      roles: "root",
+      service_port: "{{ shard2_port }}"
+      }
+  when: shard2 is defined and shard2 == "true"
+
+- name: 创建shard3用户
+  mongodb_user:
+    database: admin
+    name: "{{ item.name }}"
+    password: "{{ item.password }}"
+    roles: "{{ item.roles }}"
+    login_port: "{{ item.service_port }}"
+  with_items:
+    - {
+      name: "{{ root_user_name }}",
+      password: "{{ root_user_passwd }}",
+      roles: "root",
+      service_port: "{{ shard3_port }}"
+      }
+  when: shard3 is defined and shard3 == "true"
+
+- name: 创建config用户
+  mongodb_user:
+    database: admin
+    name: "{{ item.name }}"
+    password: "{{ item.password }}"
+    roles: "{{ item.roles }}"
+    login_port: "{{ item.service_port }}"
+  with_items:
+    - {
+      name: "{{ root_user_name }}",
+      password: "{{ root_user_passwd }}",
+      roles: "root",
+      service_port: "{{ config_port }}"
+      }
+  when: config is defined and config == "true"
+
+- name: 设置authorization
+  set_fact:
+    authorization: true
+
+- name: 配置需要认证的conf
+  include: authorization.yml
+  tags: [mongodb]
+
+- name: Flush all handlers at this point
+  meta: flush_handlers

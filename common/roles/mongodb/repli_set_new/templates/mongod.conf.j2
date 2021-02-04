@@ -1,0 +1,46 @@
+# {{ ansible_managed }}
+
+net:
+  bindIp: 0.0.0.0
+  ipv6: false
+  maxIncomingConnections: 51200
+  port: "{{ PORT }}"
+
+{% if authorization is defined and authorization %}
+replication:
+  oplogSizeMB: {{ oplogSizeMB }}
+  replSetName: {{ replset_name }}
+
+security:
+  authorization: enabled
+  keyFile: "{{ secret_file }}"
+  javascriptEnabled: false
+
+{% else %}
+
+security:
+  authorization: disabled
+{% endif %}
+
+storage:
+  dbPath: {{ data_dir }}
+  directoryPerDB: true
+  engine: wiredTiger
+  journal:
+    enabled: true
+  wiredTiger:
+    engineConfig:
+      directoryForIndexes: false
+      cacheSizeGB: {{ mem_size }}
+
+systemLog:
+  destination: {{ MONGO_SYSYTEMLOG_DESTIANTION }}
+  {% if MONGO_SYSYTEMLOG_DESTIANTION == 'file' -%}
+  logAppend: true
+  logRotate: "rename"
+  path: {{ log_file }}
+  {%- endif %}
+
+processManagement:
+  pidFilePath: {{ pid_file }}
+  timeZoneInfo: /usr/share/zoneinfo

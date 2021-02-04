@@ -1,0 +1,87 @@
+---
+- name: init_mongodb_sysctl
+  template:
+    src: sysctl_init.j2
+    dest: /etc/sysctl.conf
+  tags:
+    - init_mongodb_sysctl
+
+- name: create a xfs filesystem
+  filesystem:
+    fstype: xfs
+    dev: /dev/vdb
+
+- name: mount dev
+  mount:
+    path: /data
+    src: /dev/vdb
+    fstype: xfs
+    state: mounted
+    opts: noatime
+
+- name: create mongodb group
+  group:
+    name: mongod
+    state: present
+
+- name: create mongodb user
+  user:
+    name: mongod
+    group: mongod
+    state: present
+
+- name: 传递repo文件
+  copy: 
+    src: mongodb-4.repo
+    dest: /etc/yum.repos.d/Mongodb-4.repo
+    mode: 0744
+  tags:
+    - repofile
+
+- name: 安装一些必要的包 for yum
+  yum:
+    name: mongodb-org-{{ version }}
+    state: present
+  tags:
+    - yum
+
+- name: disable auto update for mongodb
+  lineinfile:
+    path: /etc/yum.conf
+    line: 'exclude=mongodb-org,mongodb-org-server,mongodb-org-shell,mongodb-org-mongos,mongodb-org-tools'
+
+- name: install necessary tools
+  tags:
+    - yum
+  yum:
+    name: bash-completion,unzip,conntrack,ntpdate,ntp,curl,sysstat,libseccomp,wget,vim,net-tools,git,nfs-utils,rpcbind,nload,htop,tree,telnet,python-devel,python-pip,numactl,dstat
+
+- name: modify /data mongod owner
+  shell: chown -R mongod:mongod  /data
+
+- name: add mms agent
+  shell: cd /data && curl -OL http://10.11.19.13:8080/download/agent/automation/mongodb-mms-automation-agent-manager-10.14.17.6445-1.x86_64.rhel7.rpm && rpm -U mongodb-mms-automation-agent-manager-10.14.17.6445-1.x86_64.rhel7.rpm
+
+- name: disable hugepage
+  tags:
+    - test5
+  blockinfile:
+    path: /etc/rc.local
+    create: True
+    block: |
+      if test -f /sys/kernel/mm/transparent_hugepage/enabled; then
+         echo never >> /sys/kernel/mm/transparent_hugepage/enabled
+      fi
+
+      if test -f /sys/kernel/mm/transparent_hugepage/defrag; then
+         echo never >> /sys/kernel/mm/transparent_hugepage/defrag
+      fi
+
+      blockdev --setra 32 /dev/vdb
+      echo '512' > /sys/block/vdb/queue/nr_requests
+
+- name: init_os
+  shell: init 6
+  tags:
+    - init_os
+  ignore_errors: yes

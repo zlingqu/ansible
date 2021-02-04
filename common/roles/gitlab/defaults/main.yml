@@ -1,0 +1,75 @@
+---
+# 基本配置.
+gitlab_domain: gitab-quzl.dm-ai.cn
+gitlab_external_url: "https://{{ gitlab_domain }}/"
+gitlab_git_data_dir: "/data/gitlab"
+gitlab_edition: "gitlab-ce" #包名
+gitlab_version: ''          #版本，例如13.5.2
+gitlab_backup_path: "/data/gitlab-backup" #备份的目录
+gitlab_config_template: "gitlab.rb.j2" #配置文件模板名
+
+# ssl配置.
+gitlab_redirect_http_to_https: "false" #启用https
+gitlab_ssl_certificate: "/etc/gitlab/ssl/{{ gitlab_domain }}.crt"
+gitlab_ssl_certificate_key: "/etc/gitlab/ssl/{{ gitlab_domain }}.key"
+
+# SSL 自签证书配置.
+gitlab_create_self_signed_cert: "false"
+gitlab_self_signed_cert_subj: "/C=US/ST=Missouri/L=Saint Louis/O=IT/CN={{ gitlab_domain }}"
+
+# LDAP 配置.
+gitlab_ldap_enabled: "false"
+gitlab_ldap_host: "example.com"
+gitlab_ldap_port: "389"
+gitlab_ldap_uid: "sAMAccountName"
+gitlab_ldap_method: "plain"
+gitlab_ldap_bind_dn: "CN=Username,CN=Users,DC=example,DC=com"
+gitlab_ldap_password: "password"
+gitlab_ldap_base: "DC=example,DC=com"
+
+# SMTP 配置
+gitlab_smtp_enable: "false"
+gitlab_smtp_address: "smtp.server"
+gitlab_smtp_port: "465"
+gitlab_smtp_user_name: "smtp user"
+gitlab_smtp_password: "smtp password"
+gitlab_smtp_domain: "example.com"
+gitlab_smtp_authentication: "login"
+gitlab_smtp_enable_starttls_auto: "true"
+gitlab_smtp_tls: "false"
+gitlab_smtp_openssl_verify_mode: "none"
+gitlab_smtp_ca_path: "/etc/ssl/certs"
+gitlab_smtp_ca_file: "/etc/ssl/certs/ca-certificates.crt"
+
+# SSL 客户端认证配置，即双向认证功能.
+gitlab_nginx_ssl_verify_client: ""
+gitlab_nginx_ssl_client_certificate: ""
+
+# Probably best to leave this as the default, unless doing testing.
+gitlab_restart_handler_failed_when: 'gitlab_restart.rc != 0'
+
+# Dependencies.
+gitlab_dependencies:
+  - openssh-server
+  - postfix
+  - curl
+  - openssl
+  - tzdata
+
+# 其他配置
+gitlab_time_zone: "Asia/Shanghai" #默認是UTC
+gitlab_backup_keep_time: "604800"
+gitlab_download_validate_certs: true
+gitlab_default_theme: '2'
+
+# 邮件通知配置
+gitlab_email_enabled: "false"
+gitlab_email_from: "gitlab@example.com"
+gitlab_email_display_name: "Gitlab"
+gitlab_email_reply_to: "gitlab@example.com"
+
+# 注册配置
+gitlab_registry_enable: "false"
+gitlab_registry_external_url: "https://gitlab.example.com:4567"
+gitlab_registry_nginx_ssl_certificate: "/etc/gitlab/ssl/gitlab.crt"
+gitlab_registry_nginx_ssl_certificate_key: "/etc/gitlab/ssl/gitlab.key"

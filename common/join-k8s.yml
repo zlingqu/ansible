@@ -1,0 +1,8 @@
+- hosts: "{{ group }}"
+  gather_facts: no
+  become: yes
+  roles:
+  - role: join-k8s
+
+# ansible-playbook join-k8s.yml -e group=* -e env=stage
+# ansible-playbook join-k8s.yml -e group=* -e env=prd

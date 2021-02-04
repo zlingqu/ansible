@@ -1,19 +1,4 @@
 #注意run_once、delegate_to的使用技巧
-- name: 创建cephfs用户-{{ns}}
-  shell: ceph auth get-or-create client.{{ns}} mon 'allow r' mds 'allow r,allow rw path=/{{ns}}' osd 'allow rw pool=cephfs_data' -o ./client.{{ns}}.secret
-#shell: echo {{ns}},{{size}}
-  args:
-    chdir: /root/ceph-cluster
-  register: info
-  run_once: true
-  delegate_to: 192.168.68.23
-
-- name: 查看{{ns}}的key
-  shell: base64 <<< `ceph auth print_key client.{{ns}}`
-  register: cephfs_user_key_base64
-  run_once: true
-  delegate_to: 192.168.68.23
-
 - name: 创建 /cephfs/{{ ns }} 目录 
   file:
     name: /cephfs/{{ ns }}
@@ -28,6 +13,7 @@
   run_once: true
   delegate_to: 192.168.11.20
 
+# key来自于IT提供，且经过base64编码
 - name: 添加初始化脚本
   blockinfile:
     path: /root/deployment/{{ns}}/prd/init/init.yml
@@ -39,7 +25,7 @@
         name: cephfs-{{ns}}-secret
         namespace: {{ns}}
       data:
-        key: {{ cephfs_user_key_base64.stdout }}
+        key: QVFEQ2xqdGZWT2NnRkJBQVI4ZTRNbEY0dGI1QXUrdHJaOCtHbXc9PQo=
       ---
       apiVersion: v1
       kind: PersistentVolume
@@ -52,11 +38,11 @@
           - ReadWriteMany
         cephfs:
           monitors:
-            - 172.16.68.23:6789
-            - 172.16.68.24:6789
-            - 172.16.68.25:6789
-          path: /{{ns}}
-          user: {{ns}}
+            - 10.11.1.1:6789
+            - 10.11.1.2:6789
+            - 10.11.1.3:6789
+          path: /prd/{{ns}}
+          user: prd
           secretRef:
             name: cephfs-{{ns}}-secret
           readOnly: false

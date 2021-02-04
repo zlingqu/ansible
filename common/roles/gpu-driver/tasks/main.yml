@@ -5,6 +5,12 @@
     dest: /tmp/cuda.rpm
   tags:
     - cuda
+- name: 传递nvidia-docker.repo
+  copy:
+    src: nvidia-docker.repo
+    dest: /etc/yum.repos.d/ 
+  tags:
+  - nvidia-docker
 
 - name: 安装cuda
   yum:
@@ -12,22 +18,16 @@
   tags:
     - cuda
 
-- name: 安装cuda、升级内核
+- name: 安装nvidia-driver
   yum:
     name: "{{ packages }}"
   vars:
     packages:
-    - kernel-devel-3.10.0-1127.10.1.el7.x86_64
-    - kernel-3.10.0-1127.10.1.el7.x86_64
-    - kernel-tools-libs-3.10.0-1127.10.1.el7.x86_64
-    - kernel-headers-3.10.0-1127.10.1.el7.x86_64
-    - kernel-tools-3.10.0-1127.10.1.el7.x86_64
     - nvidia-driver-latest-dkms 
     - cuda
     - nvidia-driver
   tags:
     - cuda
-
 
 - name: 添加cuda环境
   blockinfile:
@@ -35,7 +35,7 @@
     block: |-
       CUDA_HOME=/usr/local/cuda
       PATH=/usr/local/cuda/bin:$PATH
-      LD_LIBRARY_PATH=/usr/local/cuda-9.0/lib64:$LD_LIBRARY_PATH
+      LD_LIBRARY_PATH=/usr/local/cuda/lib64:$LD_LIBRARY_PATH
     state: present
     create: yes
     backup: no
@@ -50,20 +50,13 @@
     dest: /etc/modprobe.d/nvidia-installer-disable-nouveau.conf
 
 
-- name: 下载nvidia驱动
-  get_url:
-    #url: http://us.download.nvidia.com/XFree86/Linux-x86_64/440.82/NVIDIA-Linux-x86_64-440.82.run
-    url: http://192.168.3.95/NVIDIA-Linux-x86_64-430.64.run
-    dest: /tmp
-    mode: 755
+# - name: 下载nvidia驱动
+#   get_url:
+#     #url: http://us.download.nvidia.com/XFree86/Linux-x86_64/440.82/NVIDIA-Linux-x86_64-440.82.run
+#     url: http://192.168.3.95/NVIDIA-Linux-x86_64-430.64.run
+#     dest: /tmp
+#     mode: 755
 
-
-- name: 传递nvidia-docker.repo
-  copy:
-    src: nvidia-docker.repo
-    dest: /etc/yum.repos.d/ 
-  tags:
-  - nvidia-docker
 
 - name: 安装nvidia-container-runtime
   yum:

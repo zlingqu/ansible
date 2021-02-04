@@ -1,0 +1,13 @@
+- name: 配置conf
+  template:
+    src: mongod.conf.j2
+    dest: "{{ config_file }}"
+    owner: mongod
+    group: mongod
+    mode: 0644
+  notify:
+    - mongodb restart
+    - wait when mongodb is started
+
+- name: Flush all handlers at this point
+  meta: flush_handlers

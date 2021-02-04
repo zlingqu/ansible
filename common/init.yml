@@ -2,13 +2,23 @@
 - hosts: "{{ group }}"
   gather_facts: no
   become: yes
+  serial: 1
   roles:
   - role: init
+- hosts: "{{ group }}" 
+  gather_facts: no
+  vars:
+  - bin_name: "dmai_node_exporter"
+    project_name: "node-exporter"
+    D_port: 59100
+  roles:
+  #- role: prometheus/node_exporter
+  - role: prometheus/node_exporter_systemctl
 
 #是否允许使用密码登录服务器 passwd_enable_login
 ###使用方法 ansible-playbook init.yml -e group=*** -e passwd_enable_login=yes 
 #ansible-playbook init.yml -e group=k8s-dev -e passwd_enable_login=yes
 #ansible-playbook init.yml -e group=k8s-test -e passwd_enable_login=yes
 #ansible-playbook init.yml -e group=k8s-stage -e passwd_enable_login=yes
-#ansible-playbook init.yml -e group=k8s-prd -e passwd_enable_login=yes
+#ansible-playbook init.yml -e group=k8s-prd -e passwd_enable_login=no
 #ansible-playbook init.yml -e group=k8s-uat -e passwd_enable_login=yes

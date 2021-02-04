@@ -1,0 +1,74 @@
+---
+- name: reload systemd
+  systemd:
+    daemon_reload: yes
+
+- name: mongodb shard1 restart
+  service:
+    name: mongo-{{ item.service_name }}
+    state: restarted
+  with_items:
+    - { service_name: '{{ shard1_name }}', service_port: '{{ shard1_port }}' }
+  when: shard1 is defined and shard1 == "true"
+
+- name: mongodb shard2 restart
+  service:
+    name: mongo-{{ item.service_name }}
+    state: restarted
+  with_items:
+    - { service_name: '{{ shard2_name }}', service_port: '{{ shard2_port }}' }
+  when: shard2 is defined and shard2 == "true"
+
+
+- name: mongodb shard3 restart
+  service:
+    name: mongo-{{ item.service_name }}
+    state: restarted
+  with_items:
+    - { service_name: '{{ shard3_name }}', service_port: '{{ shard3_port }}' }
+  when: shard3 is defined and shard3 == "true"
+
+
+- name: mongodb config restart
+  service:
+    name: mongo-{{ item.service_name }}
+    state: restarted
+  with_items:
+    - { service_name: '{{ config_name }}', service_port: '{{ config_port }}' }
+  when: config is defined and config == "true"
+
+- name: wait when mongodb config is started
+  wait_for:
+    host: localhost
+    port: "{{ item.service_port }}"
+    timeout: 120
+  with_items:
+    - { service_name: '{{ config_name }}', service_port: '{{ config_port }}' }
+  when: config is defined and config == "true"
+
+- name: wait when mongodb shard1 is started
+  wait_for:
+    host: localhost
+    port: "{{ item.service_port }}"
+    timeout: 120
+  with_items:
+    - { service_name: '{{ shard1_name }}', service_port: '{{ shard1_port }}' }
+  when: shard1 is defined and shard1 == "true"
+
+- name: wait when mongodb shard2 is started
+  wait_for:
+    host: localhost
+    port: "{{ item.service_port }}"
+    timeout: 120
+  with_items:
+    - { service_name: '{{ shard2_name }}', service_port: '{{ shard2_port }}' }
+  when: shard2 is defined and shard2 == "true"
+
+- name: wait when mongodb shard3 is started
+  wait_for:
+    host: localhost
+    port: "{{ item.service_port }}"
+    timeout: 120
+  with_items:
+    - { service_name: '{{ shard3_name }}', service_port: '{{ shard3_port }}' }
+  when: shard3 is defined and shard3 == "true"

@@ -1,0 +1,7 @@
+- name: 重新加载 daemon
+  systemd:
+    daemon_reload: yes
+#- name: 重新启动 docker
+#  systemd:
+#    state: restarted
+#    name: docker

@@ -1,0 +1,49 @@
+# {{ ansible_managed }}
+
+net:
+  bindIp: 0.0.0.0
+  ipv6: false
+  maxIncomingConnections: 51200
+  port: {{ item.service_port }}
+
+{% if authorization is defined and authorization %}
+replication:
+  oplogSizeMB: {{ oplogSizeMB }}
+  replSetName: {{ item.service_name }}
+
+sharding:
+  clusterRole: {{ item.cluster_role }}
+
+security:
+  authorization: enabled
+  keyFile: {{ secret_file }}
+  javascriptEnabled: false
+
+{% else %}
+
+security:
+  authorization: disabled
+{% endif %}
+
+storage:
+  dbPath: {{ base_dir }}/mongo-{{ item.service_name }}/data
+  directoryPerDB: true
+  engine: wiredTiger
+  journal:
+    enabled: true
+  wiredTiger:
+    engineConfig:
+      directoryForIndexes: false
+      cacheSizeGB: {{ mem_size }}
+
+systemLog:
+  destination: {{ MONGO_SYSYTEMLOG_DESTIANTION }}
+  {% if MONGO_SYSYTEMLOG_DESTIANTION == 'file' -%}
+  logAppend: true
+  logRotate: rename
+  path: {{ base_dir }}/mongo-{{ item.service_name }}/mongod.log
+  {%- endif %}
+
+processManagement:
+  pidFilePath: {{ base_dir }}/mongo-{{ item.service_name }}/mongod.pid
+  timeZoneInfo: /usr/share/zoneinfo

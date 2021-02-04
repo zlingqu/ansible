@@ -1,0 +1,85 @@
+---
+- name: 安装 OS-specific variables.
+  include_vars: "{{ ansible_os_family }}.yml"
+
+- name: 检查  GitLab 配置文件是否已经存在.
+  stat: path=/etc/gitlab/gitlab.rb
+  register: gitlab_config_file
+
+- name: 检查 GitLab 是否已经安装
+  stat: path=/usr/bin/gitlab-ctl
+  register: gitlab_file
+
+
+- name: 安装依赖
+  package:
+    name: "{{ gitlab_dependencies }}"
+    state: present
+
+- name: 装依赖 for Debian
+  apt:
+    name: gnupg2
+    state: present
+  when: ansible_os_family == 'Debian'
+
+- name: 下载gitlab的安装脚本.
+  get_url:
+    url: "{{ gitlab_repository_installation_script_url }}"
+    dest: /tmp/gitlab_install_repository.sh
+    validate_certs: "{{ gitlab_download_validate_certs }}"
+  when: not gitlab_file.stat.exists
+
+- name: 使用下载的脚本安装gitlab
+  command: bash /tmp/gitlab_install_repository.sh
+  register: output
+  when: not gitlab_file.stat.exists
+
+- name: 定义gitlab的包名
+  set_fact:
+    gitlab_package_name: "{{ gitlab_edition }}{{ gitlab_package_version_separator }}{{ gitlab_version }}"
+  when: gitlab_version | default(false)
+
+- name: 安装 GitLab
+  package:
+    name: "{{ gitlab_package_name | default(gitlab_edition) }}"
+    state: present
+  async: 10000
+  poll: 5
+  when: not gitlab_file.stat.exists
+
+# Start and configure GitLab. Sometimes the first run fails, but after that,
+# restarts fix problems, so ignore failures on this run.
+#
+#
+#
+#
+- name: 配置gitlab (first run).
+  command: >
+    gitlab-ctl reconfigure
+    creates=/var/opt/gitlab/bootstrapped
+  failed_when: false
+
+- name: 创建/etc/gitlab/ssl目录.
+  file:
+    path: /etc/gitlab/ssl
+    state: directory
+    owner: root
+    group: root
+    mode: 0700
+  when: gitlab_create_self_signed_cert
+
+- name: 创建自签证书
+  command: >
+    openssl req -new -nodes -x509 -subj "{{ gitlab_self_signed_cert_subj }}"
+    -days 3650 -keyout {{ gitlab_ssl_certificate_key }} -out {{ gitlab_ssl_certificate }} -extensions v3_ca
+    creates={{ gitlab_ssl_certificate }}
+  when: gitlab_create_self_signed_cert
+
+- name: 拷贝 GitLab 配置文件.
+  template:
+    src: "{{ gitlab_config_template }}"
+    dest: /etc/gitlab/gitlab.rb
+    owner: root
+    group: root
+    mode: 0600
+  notify: restart gitlab
