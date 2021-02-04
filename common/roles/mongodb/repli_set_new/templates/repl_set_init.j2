@@ -1,0 +1,16 @@
+rs.initiate(
+  {
+    _id : "{{ replset_name }}",
+    members: [
+     {% for host in groups[group1] %}
+      { _id : {{loop.index}}, host: "{{host}}:{{PORT}}" },
+    {% endfor %}
+    ]
+  }
+)
+
+cfg=rs.conf()
+cfg.settings.chainingAllowed=false
+rs.reconfig(cfg)
+
+printjson(rs.status());

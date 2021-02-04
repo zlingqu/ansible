@@ -1,0 +1,57 @@
+version: 4.4.2
+#监听IP
+IP: 0.0.0.0
+
+#基准目录
+base_dir: /data
+
+config_name: config
+mongos_name: mongos
+shard1_name: shard1
+shard2_name: shard2
+shard3_name: shard3
+
+config_port: 27215
+mongos_port: 27216
+shard1_port: 27217
+shard2_port: 27218
+shard3_port: 27219
+
+config_server_1_ip: 10.12.39.3
+config_server_2_ip: 10.12.39.4
+config_server_3_ip: 10.12.39.5
+
+shard1_server_1_ip: 10.12.39.3
+shard1_server_2_ip: 10.12.39.4
+shard1_server_3_ip: 10.12.39.5
+
+shard2_server_1_ip: 10.12.39.3
+shard2_server_2_ip: 10.12.39.4
+shard2_server_3_ip: 10.12.39.5
+
+shard3_server_1_ip: 10.12.39.3
+shard3_server_2_ip: 10.12.39.4
+shard3_server_3_ip: 10.12.39.5
+
+configrole: configsvr
+shardgrole: shardsvr
+
+
+MONGO_SYSYTEMLOG_DESTIANTION: file
+
+#secret文件
+secret_file: "{{ base_dir }}/secret"
+
+#内存限制GB
+mem_size: 1
+
+oplogSizeMB: 5120
+
+#管理员账号
+root_user_name: admin
+#管理员密码：
+root_user_passwd: 4LP52c26016fLD6363
+#只读账号
+read_user_name: read
+#只读账号密码
+read_user_passwd: afd80cldseDOP

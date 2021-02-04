@@ -1,0 +1,45 @@
+### CLEAR RULES ###
+iptables -F
+iptables -X
+
+# taochao
+iptables -A INPUT -s 192.168.4.41      -j ACCEPT
+# quzhonglin
+iptables -A INPUT -s 192.168.4.197     -j ACCEPT
+# lixinfeng
+iptables -A INPUT -s 192.168.4.26     -j ACCEPT
+# zhouqipeng
+iptables -A INPUT -s 192.168.4.155     -j ACCEPT
+# linsirui
+iptables -A INPUT -s 192.168.4.168     -j ACCEPT
+# hexianming
+iptables -A INPUT -s 192.168.21.246    -j ACCEPT
+# lideshan
+iptables -A INPUT -s 192.168.28.23    -j ACCEPT
+# zengzhiyong
+iptables -A INPUT -s 192.168.23.34    -j ACCEPT
+# linsirui
+iptables -A INPUT -s 192.168.4.168    -j ACCEPT
+#Ruihao Wu
+iptables -A INPUT -s 192.168.2.4    -j ACCEPT
+#Weiqiang Li
+iptables -A INPUT -s 192.168.4.202    -j ACCEPT
+#Xukun Liu
+iptables -A INPUT -s 192.168.28.217    -j ACCEPT
+#Ziting Ma
+iptables -A INPUT -s 192.168.28.87    -j ACCEPT
+#Longlong Liao
+iptables -A INPUT -s 192.168.21.241    -j ACCEPT
+
+#Office area
+iptables -A INPUT -s 192.168.2.0/24    -j DROP
+iptables -A INPUT -s 192.168.4.0/24    -j DROP
+iptables -A INPUT -s 192.168.5.0/24    -j DROP
+iptables -A INPUT -s 192.168.6.0/24    -j DROP
+iptables -A INPUT -s 192.168.7.0/24    -j DROP
+iptables -A INPUT -s 192.168.8.0/24    -j DROP
+iptables -A INPUT -s 192.168.9.0/24    -j DROP
+iptables -A INPUT -s 192.168.18.0/24   -j DROP
+iptables -A INPUT -s 192.168.20.0/22   -j DROP
+iptables -A INPUT -s 192.168.28.0/24   -j DROP
+iptables -A INPUT -s 192.168.188.0/24  -j DROP

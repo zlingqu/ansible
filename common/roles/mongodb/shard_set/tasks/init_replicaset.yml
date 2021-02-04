@@ -1,0 +1,29 @@
+- name: 提供相关文件
+  template: src='repl_set_init.j2' dest='/tmp/repl_set_init.js'
+  #with_items:
+   # - { service_name: '{{ shard1_name }}', service_port: '{{ shard1_port }}' }
+  tags:
+    - copy_repl_set_init
+
+- name: 初始化副本集,只在第一台执行
+  shell: cat /tmp/repl_set_init.js | /usr/bin/mongo localhost:{{ item.service_port }}/admin -u "{{ root_user_name }}" -p "{{ root_user_passwd }}"
+  tags:
+    - repl_set_init
+
+#- name: 注册replicaset_host变量
+#  set_fact:
+#    replicaset_host: []
+#
+#- name: 循环处理host
+#  set_fact:
+#    replicaset_host: "{{replicaset_host}} + [ '{{ item }}:{{ PORT }}' ]"
+#  with_items: "{{ groups['mongo_rep_test'] }}"
+#
+#- name: init_replicatset
+#  mongodb_replicaset:
+#    login_host: "localhost"
+#    login_port: "{{ PORT }}"
+#    login_user: "{{ root_user_name }}"
+#    login_password: "{{ root_user_passwd }}"
+#    replica_set: "{{ replset_name }}"
+#    members: "{{ replicaset_host }}"

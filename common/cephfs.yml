@@ -2,7 +2,13 @@
   gather_facts: no
   become: yes
   vars:
-    ns: milvus
-    size: 100Gi
+    ns: "{{ namespace }}"
+    size: "{{ size }}"
   roles:
   - role: cephfs
+
+# ansible-playbook cephfs.yml -e size=1Ti -e namespace=xmc2-saas
+# 
+#
+#
+# ansible-playbook cephfs.yml -e size= -e namespace=

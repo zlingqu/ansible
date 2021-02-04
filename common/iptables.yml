@@ -1,7 +1,8 @@
 - hosts: "{{ group }}"
   gather_facts: no
   roles:
-  - role: iptables
+  #- role: iptables
+  - role: iptables_db
   vars:
     state: present
 #delete : ansible-playbook iptables.yml -e group=local 

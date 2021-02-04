@@ -1,0 +1,1 @@
+ansible-playbook -i /data/ansible-public/common/hosts_mongo_repli_set_new.ini  /data/ansible-public/common/mongo_repli_set_new.yml  -e group=mongo_repset_hw -e group1=inip

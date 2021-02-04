@@ -1,0 +1,34 @@
+- name: 分发kernel相关的rpm包
+  copy:
+    src: "{{ item }}"
+    dest: /tmp
+  with_items:
+  - kernel-3.10.0-1127.19.1.el7.x86_64.rpm
+  - kernel-tools-libs-3.10.0-1127.19.1.el7.x86_64.rpm
+  - kernel-headers-3.10.0-1127.19.1.el7.x86_64.rpm
+  - kernel-tools-3.10.0-1127.19.1.el7.x86_64.rpm
+  - linux-firmware-20191203-76.gite8a0f4c.el7.noarch.rpm
+
+
+- name: 升级内核
+  yum:
+    name: "{{ packages }}"
+  vars:
+    packages:
+    - /tmp/kernel-3.10.0-1127.19.1.el7.x86_64.rpm
+    - /tmp/kernel-tools-libs-3.10.0-1127.19.1.el7.x86_64.rpm
+    - /tmp/kernel-headers-3.10.0-1127.19.1.el7.x86_64.rpm
+    - /tmp/kernel-tools-3.10.0-1127.19.1.el7.x86_64.rpm
+    - /tmp/linux-firmware-20191203-76.gite8a0f4c.el7.noarch.rpm
+
+
+- name: 删除rpm文件
+  file:
+    path: "{{ item }}"
+    state: absent
+  with_items:
+    - /tmp/kernel-3.10.0-1127.19.1.el7.x86_64.rpm
+    - /tmp/kernel-tools-libs-3.10.0-1127.19.1.el7.x86_64.rpm
+    - /tmp/kernel-headers-3.10.0-1127.19.1.el7.x86_64.rpm
+    - /tmp/kernel-tools-3.10.0-1127.19.1.el7.x86_64.rpm
+    - /tmp/linux-firmware-20191203-76.gite8a0f4c.el7.noarch.rpm

@@ -1,0 +1,58 @@
+- name: 构建config config
+  template:
+    src: mongod.conf.j2
+    dest: "{{ base_dir }}/mongo-{{ item.service_name }}/mongod.config"
+    owner: mongod
+    group: mongod
+    mode: '0644'
+  with_items:
+    - { service_name: '{{ config_name }}', service_port: '{{ config_port }}', cluster_role: '{{ configrole }}' }
+  when: config is defined and config == "true"
+  notify:
+    - mongodb config restart
+    - wait when mongodb config is started
+
+- name: 构建shard1 config
+  template:
+    src: mongod.conf.j2
+    dest: "{{ base_dir }}/mongo-{{ item.service_name }}/mongod.config"
+    owner: mongod
+    group: mongod
+    mode: '0644'
+  with_items:
+    - { service_name: '{{ shard1_name }}', service_port: '{{ shard1_port }}', cluster_role: '{{ shardgrole }}' }
+  when: shard1 is defined and shard1 == "true"
+  notify:
+    - mongodb shard1 restart
+    - wait when mongodb shard1 is started
+
+- name: 构建shard2 config
+  template:
+    src: mongod.conf.j2
+    dest: "{{ base_dir }}/mongo-{{ item.service_name }}/mongod.config"
+    owner: mongod
+    group: mongod
+    mode: '0644'
+  with_items:
+    - { service_name: '{{ shard2_name }}', service_port: '{{ shard2_port }}', cluster_role: '{{ shardgrole }}' }
+  when: shard2 is defined and shard2 == "true"
+  notify:
+    - mongodb shard2 restart
+    - wait when mongodb shard2 is started
+
+- name: 构建shard3 config
+  template:
+    src: mongod.conf.j2
+    dest: "{{ base_dir }}/mongo-{{ item.service_name }}/mongod.config"
+    owner: mongod
+    group: mongod
+    mode: '0644'
+  with_items:
+    - { service_name: '{{ shard3_name }}', service_port: '{{ shard3_port }}', cluster_role: '{{ shardgrole }}' }
+  when: shard3 is defined and shard3 == "true"
+  notify:
+    - mongodb shard3 restart
+    - wait when mongodb shard3 is started
+
+- name: Flush all handlers at this point
+  meta: flush_handlers

@@ -1,5 +1,5 @@
-#- name: 证书相关
-#  include: cert.yml
+- name: 证书相关
+  include: cert.yml
 
 
 - name: 下载etcd并解压二进制文件

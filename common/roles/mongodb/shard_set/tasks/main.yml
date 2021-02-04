@@ -1,0 +1,86 @@
+---
+- name: 配置需要的资源
+  include: configure.yml
+  tags: [mongodb]
+
+- name: 初始化认证
+  include: auth_initialization.yml
+  tags: [mongodb]
+
+- name: 初始化副本集config
+  include: init_replicaset.yml
+  with_items:
+    - { service_name: '{{ config_name }}', service_port: '{{ config_port }}' }
+  when: config is defined and config == "true" and MONGO_MASTER is defined and MONGO_MASTER == "true"
+  tags: [mongodb]
+
+- name: 初始化副本集shard1
+  include: init_replicaset.yml
+  with_items:
+    - { service_name: '{{ shard1_name }}', service_port: '{{ shard1_port }}' }
+  when: shard1 is defined and shard1 == "true" and MONGO_MASTER is defined and MONGO_MASTER == "true"
+  tags: [mongodb]
+
+- name: 初始化副本集shard2
+  include: init_replicaset.yml
+  with_items:
+    - { service_name: '{{ shard2_name }}', service_port: '{{ shard2_port }}' }
+  when: shard2 is defined and shard2 == "true" and MONGO_MASTER is defined and MONGO_MASTER == "true"
+  tags: [mongodb]
+
+- name: 初始化副本集shard3
+  include: init_replicaset.yml
+  with_items:
+    - { service_name: '{{ shard3_name }}', service_port: '{{ shard3_port }}' }
+  when: shard3 is defined and shard3 == "true" and MONGO_MASTER is defined and MONGO_MASTER == "true"
+  tags: [mongodb]
+
+- name: 启动 config service
+  shell: systemctl daemon-reload && systemctl enable mongo-{{ item.service_name }}.service && systemctl restart mongo-{{ item.service_name }}.service
+  with_items:
+    - { service_name: '{{ config_name }}', service_port: '{{ config_port }}' }
+  when: config is defined and config == "true"
+  tags: [mongodb]
+
+- name: 启动 shard1 service
+  shell: systemctl daemon-reload && systemctl enable mongo-{{ item.service_name }}.service && systemctl restart mongo-{{ item.service_name }}.service
+  with_items:
+    - { service_name: '{{ shard1_name }}', service_port: '{{ shard1_port }}' }
+  when: shard1 is defined and shard1 == "true"
+  tags: [mongodb]
+
+- name: 启动 shard2 service
+  shell: systemctl daemon-reload && systemctl enable mongo-{{ item.service_name }}.service && systemctl restart mongo-{{ item.service_name }}.service
+  with_items:
+    - { service_name: '{{ shard2_name }}', service_port: '{{ shard2_port }}' }
+  when: shard2 is defined and shard2 == "true"
+  tags: [mongodb]
+
+- name: 启动 shard3 service
+  shell: systemctl daemon-reload && systemctl enable mongo-{{ item.service_name }}.service && systemctl restart mongo-{{ item.service_name }}.service
+  with_items:
+    - { service_name: '{{ shard3_name }}', service_port: '{{ shard3_port }}' }
+  when: shard3 is defined and shard3 == "true"
+  tags: [mongodb]
+
+- name: 启动 mongos service
+  shell: systemctl daemon-reload && systemctl enable mongo-{{ item.service_name }}.service && systemctl restart mongo-{{ item.service_name }}.service
+  with_items:
+    - { service_name: '{{ mongos_name }}', service_port: '{{ mongos_port }}' }
+  when: mongos is defined and mongos == "true"
+  tags: [mongodb]
+
+- name: add shard
+  mongodb_shard:
+    login_host: 127.0.0.1
+    login_port: "{{ mongos_port }}"
+    login_user: "{{ root_user_name }}"
+    login_password: "{{ root_user_passwd }}"
+    shard: "{{ item }}"
+    state: present
+  with_items:
+    - "{{ shard1_name }}/{{ shard1_server_1_ip }}:{{ shard1_port }},{{ shard1_server_2_ip }}:{{ shard1_port }},{{ shard1_server_3_ip }}:{{ shard1_port }}"
+    - "{{ shard2_name }}/{{ shard2_server_1_ip }}:{{ shard2_port }},{{ shard2_server_2_ip }}:{{ shard2_port }},{{ shard2_server_3_ip }}:{{ shard2_port }}"
+    - "{{ shard3_name }}/{{ shard3_server_1_ip }}:{{ shard3_port }},{{ shard3_server_2_ip }}:{{ shard3_port }},{{ shard3_server_3_ip }}:{{ shard3_port }}"
+  when: mongos is defined and mongos == "true" and MONGO_MASTER is defined
+  tags: [add shard]

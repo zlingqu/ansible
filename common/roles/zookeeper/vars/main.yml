@@ -1,6 +1,6 @@
-version: 3.4.14
-url: "https://mirrors.aliyun.com/apache/zookeeper/zookeeper-{{version}}/zookeeper-{{version}}.tar.gz"
-app_dir: "/usr/local/zookeeper-{{ version }}"
+version: 3.6.2
+url: "https://mirrors.aliyun.com/apache/zookeeper/zookeeper-{{version}}/apache-zookeeper-{{version}}.tar.gz"
+app_dir: "/usr/local/apache-zookeeper-{{ version }}"
 data_dir: "{{ app_dir }}/data"
 log_dir: "{{ app_dir }}/logs"
 zk_connect_port: 2888

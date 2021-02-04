@@ -21,3 +21,7 @@ pkgs:
    - yum-utils
    - nfs-utils
    - nc
+   - libaio
+   - lsof
+   - mlocate
+   - numactl

@@ -1,0 +1,40 @@
+version: 4.4.2
+#监听IP
+IP: 0.0.0.0
+#监听端口
+PORT: 27017
+
+#基准目录
+base_dir: /data/mongo-myrstest
+
+
+#配置文件目录
+config_file: "{{ base_dir }}/mongod.config"
+#数据目录
+data_dir: "{{ base_dir }}/data"
+# pid目录
+pid_file: "{{ base_dir }}/mongo.pid"
+#日志文件
+log_file: "{{ base_dir }}/mongod.log"
+
+MONGO_SYSYTEMLOG_DESTIANTION: file
+
+#secret文件
+secret_file: "{{ base_dir }}/secret"
+
+#内存限制GB
+mem_size: 1
+#副本集名字
+replset_name: myrs
+
+#oplogsize
+oplogSizeMB: 5120
+
+#管理员账号
+root_user_name: admin
+#管理员密码：
+root_user_passwd: 4LP52c26016fLD6363
+#只读账号
+read_user_name: read
+#只读账号密码
+read_user_passwd: afd80cldseDOP

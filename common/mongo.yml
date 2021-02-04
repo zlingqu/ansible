@@ -1,12 +1,18 @@
-- hosts: mongo-rs
+- hosts: "{{ group }}"
   gather_facts: no
   roles:
   - mongodb/repli_set
   #- mongodb/stand_alone
+  #- mongodb/shard_set
   vars:
-    base_dir: /data/mongo-x4c
-    PORT: 27300 
-    root_user_name: admin
-    root_user_passwd: 42833ec473f43d
-    read_user_name: read
-    read_user_passwd: cDFd3649DT84
+    #base_dir: /data/mongo-x4c
+    #base_dir: /data/mongo-xmc-base-uat
+    #PORT: 27100 
+    #root_user_name: admin
+    #root_user_passwd: admin
+    #read_user_name: read
+    #read_user_passwd: read
+
+
+
+#ansible-playbook mongo.yml -e group=

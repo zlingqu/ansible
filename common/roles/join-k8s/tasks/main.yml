@@ -1,0 +1,21 @@
+- name: 获取k8s-join-command
+  shell: kubeadm token create --print-join-command
+  register: k8s_join_command
+  run_once: true
+  delegate_to: '{{ envIP[env] }}'
+- name: 显示
+  debug:
+    msg: "join的命令是 {{ k8s_join_command.stdout }}"
+
+- name: 读取 kubelet.conf 文件 stat 信息
+  stat:
+    path: /etc/kubernetes/kubelet.conf
+  register: kubelet_conf_stat
+
+- name: 加入集群
+  #debug:
+  #  msg: "{{ k8s_join_command.stdout }} --node-name {{ inventory_hostname }}"
+  shell: "{{ k8s_join_command.stdout }} --node-name {{ inventory_hostname }}"
+  when: 
+   - not kubelet_conf_stat.stat.exists
+  

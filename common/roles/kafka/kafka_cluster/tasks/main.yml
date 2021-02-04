@@ -27,8 +27,8 @@
 
 - name: 设置定时任务，kafka日志
   cron:
-    hour: 5
-    minute: 0
+    hour: "5"
+    minute: "0"
     job: "find {{ app_dir }}/logs -mtime +30|xargs rm -f"
     name: delete kafka logs
   tags:

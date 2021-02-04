@@ -1,0 +1,65 @@
+- name: create mongodb group
+  group:
+    name: mongod
+    state: present
+
+- name: create mongodb user
+  user:
+    name: mongod
+    group: mongod
+    state: present
+
+- name: 构建service
+  template:
+    src: mongod-service.j2
+    dest: "/lib/systemd/system/{{ service_name }}.service"
+    owner: root
+    group: root
+    mode: '0644'
+  notify:
+    - reload systemd
+
+- name: install_numactl
+  yum:
+    name: numactl
+    state: latest
+  tags:
+    - install_numact
+
+- name: 停止 mongod
+  shell: /usr/bin/mongod --shutdown -f /data/{{ service_name }}/mongod.config|cat
+  when:
+    - mongod is defined
+
+- name: 停止 mongos
+  shell: /usr/bin/mongos --shutdown -f /data/{{ service_name }}/mongod.config|cat
+  when:
+    - mongos is defined
+
+- name: 关闭fork
+  lineinfile:
+   dest: "/data/{{ service_name }}/mongod.config"
+   regexp: "fork: true"
+   line: "#fork: true"
+
+- name: modify mongod owner
+  shell: chown -R mongod:mongod  /data/{{ service_name }}/
+
+- name: 关闭rc.local启动
+  lineinfile:
+   dest: /etc/rc.local
+   regexp: "^mongos -f /data/{{ service_name }}/mongod.config"
+   line: "#mongos -f /data/{{ service_name }}/mongod.config --systemctl start/status {{ service_name }}"
+  when:
+   - mongos is defined
+
+- name: 关闭rc.local启动
+  lineinfile:
+   dest: /etc/rc.local
+   regexp: "^mongod -f /data/{{ service_name }}/mongod.config"
+   line: "#mongod -f /data/{{ service_name }}/mongod.config --systemctl start/status {{ service_name }}"
+  when:
+   - mongod is defined
+
+- name: 启动 mongo
+  shell: systemctl daemon-reload && systemctl enable {{ service_name }}.service && systemctl restart {{ service_name }}.service

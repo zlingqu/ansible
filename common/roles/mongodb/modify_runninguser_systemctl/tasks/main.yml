@@ -1,0 +1,4 @@
+---
+- name: 配置需要的资源
+  include: configure.yml
+  tags: [mongodb]

@@ -1,0 +1,41 @@
+#并发连接backlog设置
+net.core.somaxconn=262144
+net.core.netdev_max_backlog=262144
+
+net.core.rmem_default=262144
+net.core.wmem_default=262144
+net.core.rmem_max=16777216
+net.core.wmem_max=16777216
+net.core.optmem_max=16777216
+
+#可用知名端口范围:
+net.ipv4.ip_local_port_range=1024 65535
+net.ipv4.tcp_max_syn_backlog=16384
+
+net.ipv4.ip_forward = 1
+net.ipv4.tcp_syncookies = 1
+kernel.msgmnb = 65536
+kernel.msgmax = 65536
+kernel.shmmax = 483183820800
+kernel.shmall = 117964800
+net.ipv4.tcp_syn_retries = 3
+net.ipv4.tcp_retries2 = 5
+net.ipv4.tcp_tw_recycle = 1
+net.ipv4.tcp_tw_reuse = 1
+net.ipv4.tcp_fin_timeout = 30
+net.ipv4.tcp_keepalive_time = 300
+net.ipv4.tcp_keepalive_probes = 3
+net.ipv4.tcp_keepalive_intvl = 30
+
+#TCP Socket 读写 Buffer 设置:
+net.ipv4.tcp_rmem=1024 4096 16777216
+net.ipv4.tcp_wmem=1024 4096 16777216
+net.ipv4.tcp_max_tw_buckets = 180000
+
+#sem
+kernel.shmall = 117964800
+kernel.shmmax = 483183820800
+kernel.sem = 4000 512000 4000 128
+
+#file
+fs.file-max = 65536

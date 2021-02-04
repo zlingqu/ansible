@@ -1,0 +1,8 @@
+- hosts: "{{ group }}"
+  gather_facts: no
+  roles:
+  - mongodb/repli_set_new
+  #- mongodb/stand_alone
+
+
+#ansible-playbook mongo.yml -e group=

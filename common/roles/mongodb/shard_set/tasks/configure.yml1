@@ -1,0 +1,182 @@
+- name: create mongodb group
+  group:
+    name: mongod
+    state: present
+
+- name: create mongodb user
+  user:
+    name: mongod
+    group: mongod
+    state: present
+
+- name: 创建shard1 data目录
+  file:
+    path: "{{ item.data_dir}}"
+    state: directory
+    owner: mongod
+    group: mongod
+  with_items:
+    - { data_dir: "{{ based_dir }}/mongo_{{ shard1_name }}/data" }
+  when: shard1 is defined and shard1 == "true" 
+
+
+- name: 创建shard2 data目录
+  file:
+    path: "{{ item.data_dir}}"
+    state: directory
+    owner: mongod
+    group: mongod
+  with_items:
+    - { data_dir: "{{ based_dir }}/mongo_{{ shard2_name }}/data" }
+  when: shard2 is defined and shard2 == "true"
+
+
+- name: 创建shard3 data目录
+  file:
+    path: "{{ item.data_dir}}"
+    state: directory
+    owner: mongod
+    group: mongod
+  with_items:
+    - { data_dir: "{{ based_dir }}/mongo_{{ shard3_name }}/data" }
+  when: shard3 is defined and shard3 == "true"
+
+- name: 创建config data目录
+  file:
+    path: "{{ item.data_dir}}"
+    state: directory
+    owner: mongod
+    group: mongod
+  with_items:
+    - { data_dir: "{{ based_dir }}/mongo_{{ config_name }}/data" }
+  when: config is defined and config == "true"
+
+
+- name: 创建mongos data目录
+  file:
+    path: "{{ item.data_dir}}"
+    state: directory
+    owner: mongod
+    group: mongod
+  with_items:
+    - { data_dir: "{{ based_dir }}/mongo_{{ mongos_name }}/data" }
+  when: mongos is defined and mongos == "true"
+
+
+- name: 传递repo文件
+  copy: 
+    src: mongodb-4.repo
+    dest: /etc/yum.repos.d/Mongodb-4.repo
+    mode: 0744
+  tags:
+    - repofile
+
+- name: 传递keyfile文件
+  copy: 
+    src: secret
+    dest: "{{ secret_file }}"
+    owner: mongod
+    group: mongod
+    mode: 0600
+  tags:
+    - keyfile
+
+- name: 安装一些必要的包 for yum
+  yum:
+    name: mongodb-org-{{ version }}
+    state: present
+  tags:
+    - yum
+
+- name: disable auto update for mongodb
+  lineinfile:
+    path: /etc/yum.conf
+    line: 'exclude=mongodb-org,mongodb-org-server,mongodb-org-shell,mongodb-org-mongos,mongodb-org-tools'
+
+- name: install necessary tools
+  tags:
+    - yum
+  yum:
+    name: bash-completion,unzip,conntrack,ntpdate,ntp,curl,sysstat,libseccomp,wget,vim,net-tools,git,nfs-utils,rpcbind,nload,htop,tree,telnet,python-devel,python-pip,numactl
+
+- name: Install PyMongo from PIP
+  pip:
+    name: pymongo
+    version: 3.7.1
+
+- name: 相关服务管理
+  service:
+    name: "{{ item.name }}"
+    state: "{{ item.state }}"
+    enabled: "{{ item.enabled }}"
+  with_items:
+    - { name: 'mongod', state: 'stopped', enabled: 'false' }
+    - { name: 'firewalld', state: 'stopped', enabled: 'false' }
+    - { name: 'postfix', state: 'stopped', enabled: 'false' }
+
+- name: 构建service
+  template:
+    src: mongodb.service.j2
+    dest: "/lib/systemd/system/mongo-{{ item.service_name }}.service"
+    owner: root
+    group: root
+    mode: '0644'
+  with_items:
+    - { service_name: '{{ config_name }}', service_port: '{{ config_port }}' }
+  when: config is defined and config == "true" 
+  #notify:
+    #- reload systemd
+
+- name: 构建service
+  template:
+    src: mongos.service.j2
+    dest: "/lib/systemd/system/mongo-{{ item.service_name }}.service"
+    owner: root
+    group: root
+    mode: '0644'
+  with_items:
+    - { service_name: '{{ mongos_name }}', service_port: '{{ mongos_port }}' }
+  when: mongos is defined and mongos == "true"              
+  #notify:
+    #- reload systemd
+
+- name: 构建service
+  template:
+    src: mongodb.service.j2
+    dest: "/lib/systemd/system/mongo-{{ item.service_name }}.service"
+    owner: root
+    group: root
+    mode: '0644'
+  with_items:
+    - { service_name: '{{ shard1_name }}', service_port: '{{ shard1_port }}' }
+  when: shard1 is defined and shard1 == "true"     
+  #notify:
+    #- reload systemd
+
+- name: 构建service
+  template:
+    src: mongodb.service.j2
+    dest: "/lib/systemd/system/mongo-{{ item.service_name }}.service"
+    owner: root
+    group: root
+    mode: '0644'
+  with_items:
+    - { service_name: '{{ shard2_name }}', service_port: '{{ shard2_port }}' }
+  when: shard2 is defined and shard2 == "true"              
+ # notify:
+    #- reload systemd
+
+- name: 构建service
+  template:
+    src: mongodb.service.j2
+    dest: "/lib/systemd/system/mongo-{{ item.service_name }}.service"
+    owner: root
+    group: root
+    mode: '0644'
+  with_items:
+    - { service_name: '{{ shard3_name }}', service_port: '{{ shard3_port }}' }
+  when: shard3 is defined and shard3 == "true"              
+  #notify:
+    #- reload systemd
+
+

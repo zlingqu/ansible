@@ -1,7 +1,9 @@
 - hosts: "{{ group }}"
-  gather_facts: no
+  gather_facts: yes
   roles:
   - role: "{{ role }}"
 
-#  ansible-playbook common.yml -e group=jdk -e role=jdk
-#  ansible-playbook common.yml -e group=aicp -e role=docker-compose
+#  ansible-playbook common.yml -e role=jdk -e group=
+#  ansible-playbook common.yml -e role=docker -e docker-home=/home/docker -e group=
+#  ansible-playbook common.yml -e role=docker-compose -e group=
+#  ansible-playbook common.yml -e role=gitlab -e group=gitlab-ci-test

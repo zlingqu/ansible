@@ -1,0 +1,82 @@
+#注意run_once、delegate_to的使用技巧
+- name: 创建cephfs用户-{{ns}}
+  shell: ceph auth get-or-create client.{{ns}} mon 'allow r' mds 'allow r,allow rw path=/{{ns}}' osd 'allow rw pool=cephfs_data' -o ./client.{{ns}}.secret
+#shell: echo {{ns}},{{size}}
+  args:
+    chdir: /root/ceph-cluster
+  register: info
+  run_once: true
+  delegate_to: 192.168.68.23
+
+- name: 查看{{ns}}的key
+  shell: base64 <<< `ceph auth print_key client.{{ns}}`
+  register: cephfs_user_key_base64
+  run_once: true
+  delegate_to: 192.168.68.23
+
+- name: 创建 /cephfs/{{ ns }} 目录 
+  file:
+    name: /cephfs/{{ ns }}
+    state: directory
+  run_once: true
+  delegate_to: 192.168.13.201
+
+- name: 创建 deployment/{{ns}}/prd/init目录
+  file:
+    name: deployment/{{ns}}/prd/init
+    state: directory
+  run_once: true
+  delegate_to: 192.168.11.20
+
+- name: 添加初始化脚本
+  blockinfile:
+    path: /root/deployment/{{ns}}/prd/init/init.yml
+    block: |-
+      ---
+      apiVersion: v1
+      kind: Secret
+      metadata:
+        name: cephfs-{{ns}}-secret
+        namespace: {{ns}}
+      data:
+        key: {{ cephfs_user_key_base64.stdout }}
+      ---
+      apiVersion: v1
+      kind: PersistentVolume
+      metadata:
+        name: {{ns}}-pv
+      spec:
+        capacity:
+          storage: {{size}}
+        accessModes:
+          - ReadWriteMany
+        cephfs:
+          monitors:
+            - 172.16.68.23:6789
+            - 172.16.68.24:6789
+            - 172.16.68.25:6789
+          path: /{{ns}}
+          user: {{ns}}
+          secretRef:
+            name: cephfs-{{ns}}-secret
+          readOnly: false
+        persistentVolumeReclaimPolicy: Retain
+      ---
+      kind: PersistentVolumeClaim
+      apiVersion: v1
+      metadata:
+        name: mypvc
+        namespace: {{ns}}
+      spec:
+        accessModes:
+        - ReadWriteMany
+        resources:
+          requests:
+            storage: {{size}}
+        volumeName: {{ns}}-pv
+    state: present
+    create: yes
+    backup: no
+    marker: "# Ansible inventory yml {mark}"
+  run_once: true
+  delegate_to: 192.168.11.20

@@ -1,0 +1,57 @@
+- name: 创建必要的目录
+  file:
+    path: "{{ item.path }}"
+    state: "{{ item.type }}"
+  with_items:
+     - { type: 'directory', path: '/etc/docker'}
+
+- name: 添加yum仓库
+  include: yum.yml
+  tags:
+  - repo
+
+- name: 安装一些必要的包 for yum
+  yum:
+    name: "{{ pkgs }}"
+    state: present
+  tags:
+    - yum
+
+
+- name: 读取 /etc/docker/daemon.json 文件 stat 信息
+  stat:
+    path: /etc/docker/daemon.json
+  register: docker_conf_stat
+  tags: conf
+
+- name: docker配置文件提供
+  template:
+    src: daemon.json.j2
+    dest: "/etc/docker/daemon.json"
+  when:
+  - not docker_conf_stat.stat.exists
+  notify:
+  - 重新加载 daemon
+  tags:
+    - conf
+
+
+- name: 相关服务管理
+  service:
+    name: "{{ item.name }}"
+    state: "{{ item.state }}"
+    enabled: "{{ item.enabled }}"
+  with_items:
+    - { name: 'docker', state: 'started', enabled: 'true' }
+
+
+- name: 设置定时任务，清理docker image
+  cron:
+    weekday: "0"
+    hour: "5"
+    minute: "0"
+    #job: "docker system prune -f"
+    job: "docker image prune -a -f"
+    name: delete docker images
+  tags:
+    - cron
