@@ -1,0 +1,18 @@
+- name: 解压jdk
+  unarchive:
+    src: "jdk-{{ version }}-linux-x64.tar.gz" 
+    dest: "{{ jdk_dir }}"
+    creates: "{{ jdk_dir }}/{{ dir_name }}"
+- name: 创建软连接
+  file:
+    src: "{{ jdk_dir }}/{{ dir_name }}"
+    dest: "{{ jdk_dir }}/jdk"
+    state: link
+- name: 添加jdk环境变量
+  lineinfile: 
+    path: /etc/profile
+#    line: abc
+    line: "{{ item }}"
+  with_items:
+     - JAVA_HOME={{ jdk_dir }}/jdk
+     - PATH=$JAVA_HOME/bin:$PATH

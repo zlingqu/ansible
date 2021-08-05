@@ -1,0 +1,85 @@
+- name: "统一时区为 Asia/Shanghai"
+  timezone:
+    name: Asia/Shanghai
+
+- name: 创建必要的目录
+  file:
+    path: "{{ item.path }}"
+    state: "{{ item.type }}"
+    access_time: "preserve"
+  with_items:
+     - { type: 'directory', path: '/data'}
+     - { type: 'directory', path: '~/.ssh'}
+     - { type: 'touch', path: '~/.ssh/authorized_keys'}
+  tags:
+    - file
+- name: 主机信任
+  lineinfile :
+    path: /root/.ssh/authorized_keys
+    line: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDS/n7Cjgv8Je1AWRyOctT3N/6iSQa6cyVrjQQY+sPsCjtXMLQvA9TKJwVIkRC1Dr2rQ1/hAINmkxtnh4lFN1pMmKH4CXo3hsPt6o7VnrRqFyQx28Cnewz9vML6Tr+9Kw5k3XO2XB9CV3Lq05vG0Jt8q+tjsDxnsKOcZheLKXUeIRLwuoEGz6oZVYc/iTeyWGpqoa1dIw+Sx5KhUjsWKPqtJbzl7c2AlYXCbkND63FW0MBAT7G+0lkzpA0l+/tYrOWGBIWxYdl2seiGs1UuPVG9u+F1JV71B4XB6ua0ZSjbGcc5IM7wmPYsTPu/Q/i9EU/0VI9/qkq7nJqipJPXi1Tl jenkins@dm-ai.cn"
+  tags:
+  - file
+
+- name: 修改limits
+  pam_limits:
+    limit_type: "{{ item.type }}"
+    limit_item: "{{ item.item }}"
+    domain: '*'
+    value: 65535
+  with_items:
+    - { type: 'hard', item: 'nofile' }
+    - { type: 'hard', item: 'nproc' }
+    - { type: 'soft', item: 'nofile' }
+    - { type: 'soft', item: 'nproc' }
+- name: 安装epel源
+  yum:
+    name: epel-release
+- name: 安装一些必要的包 for yum
+  yum:
+    name: "{{ pkgs }}"
+    state: present
+  tags:
+    - yum
+- name: 相关服务管理
+  service:
+    name: "{{ item.name }}"
+    state: "{{ item.state }}"
+    enabled: "{{ item.enabled }}"
+  with_items:
+    - { name: 'ntpdate', state: 'started', enabled: 'true'}
+    - { name: 'ntpd', state: 'started', enabled: 'true'}
+    - { name: 'postfix', state: 'stopped', enabled: 'false' }
+    - { name: 'firewalld', state: 'stopped', enabled: 'false' }
+    - { name: 'cups', state: 'stopped', enabled: 'false' }
+    - { name: 'rpcbind', state: 'stopped', enabled: 'false' }
+    - { name: 'rpcbind.socket', state: 'stopped', enabled: 'false' }
+  ignore_errors: yes
+  tags:
+  - systemctl
+
+- name: 禁止selinux
+  selinux:
+    state: disabled
+
+- name: 修改内核参数
+  sysctl:
+    name: "{{ item.name }}"
+    value: "{{ item.value }}"
+    state: present
+    sysctl_set: yes #使用systctl 命令立即生效
+    sysctl_file: /usr/lib/sysctl.d/00-system.conf  #添加到此文件，默认是/etc/sysctl.conf
+  with_items:
+    - {name: 'vm.max_map_count', value: '262144'}
+  tags: sysctl
+  ignore_errors: yes
+
+
+- name: 修改/etc/rc.d/rc.local权限
+  file:
+   path: /etc/rc.d/rc.local
+   mode: "a+x"
+- name: 修改hostname
+  hostname:
+    name: "{{ hostname }}"
+  tags:
+    - hostname
