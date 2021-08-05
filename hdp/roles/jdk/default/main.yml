@@ -1,0 +1,3 @@
+version: 8u201
+jdk_dir: /usr/local
+dir_name: jdk1.8.0_201

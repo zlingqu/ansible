@@ -1,0 +1,77 @@
+- name: 关闭 selinux
+  selinux: state=disabled
+  
+- name: 修改 /etc/hosts 文件
+  blockinfile:
+    path: /etc/hosts
+    block: |-
+      {% for item in ansible_play_batch %}
+      {{ item }} {{ hostvars[item]['hostname'] }}
+      {% endfor %}
+    state: present
+    create: yes
+    backup: no
+    marker: "# Ansible inventory hosts {mark}"
+  tags: hosts
+
+- name: 添加域名解析到hosts
+  lineinfile:
+    path: /etc/hosts
+    line: "10.12.19.31 devops-10-12-19-31"
+    state: present
+  tags: hosts
+  
+
+- name: 设置vm.swappiness=10
+  sysctl:
+    name: "{{ item.name }}"
+    value: "{{ item.value }}"
+    state: present
+    sysctl_set: yes #使用systctl 命令立即生效
+  with_items:
+    - {name: 'vm.swappiness', value: '10' }
+  tags: sysctl
+
+- name: 禁用透明大页面压缩
+  shell: "echo never > /sys/kernel/mm/transparent_hugepage/defrag && \
+          echo never > /sys/kernel/mm/transparent_hugepage/enabled"
+
+- name: 永久禁用透明大页面压缩
+  lineinfile:
+    dest: /etc/rc.local
+    regexp: "transparent_hugepage"
+    line: "echo never > /sys/kernel/mm/transparent_hugepage/defrag && echo never > /sys/kernel/mm/transparent_hugepage/enabled"
+
+###  jdk相关
+- name: 安装 JDK
+  include: jdk.yml
+  tags: jdk
+
+
+
+- name: 添加ambari的yum源
+  yum_repository:
+    name: ambari
+    description: ambari server
+    baseurl: "{{ ambari_yum_repo }}"
+    enabled: yes
+    gpgcheck: no
+    state: present
+  tags: yum
+
+
+- name: 安装ambari-agent
+  yum: update_cache=yes name={{ item }} state=present
+  with_items:
+  - ambari-agent
+  tags: yum
+
+- name: 启动ambari-agent
+  service:
+    name: "{{ item.name }}"
+    state: "{{ item.state }}"
+    enabled: "{{ item.enabled }}"
+  with_items:
+    - { name: 'ambari-agent', state: 'started', enabled: 'true'}
+  tags: ambari-agent
+
