@@ -42,12 +42,6 @@
     regexp: "transparent_hugepage"
     line: "echo never > /sys/kernel/mm/transparent_hugepage/defrag && echo never > /sys/kernel/mm/transparent_hugepage/enabled"
 
-###  jdk相关
-- name: 安装 JDK
-  include: jdk.yml
-  tags: jdk
-
-
 
 - name: 添加ambari的yum源
   yum_repository:

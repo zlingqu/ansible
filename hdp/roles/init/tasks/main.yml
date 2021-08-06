@@ -25,7 +25,7 @@
     limit_type: "{{ item.type }}"
     limit_item: "{{ item.item }}"
     domain: '*'
-    value: 65535
+    value: "65535"
   with_items:
     - { type: 'hard', item: 'nofile' }
     - { type: 'hard', item: 'nproc' }
