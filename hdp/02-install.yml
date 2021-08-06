@@ -2,5 +2,5 @@
   - ambari-agent
   gather_facts: no
   roles: 
-  - JDK 
-  - prepare 
+  - jdk
+  - install 
